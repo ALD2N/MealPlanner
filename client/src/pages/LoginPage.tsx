@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../contexts/ToastContext';
 
@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [name, setName] = useState('');
 
   if (user) {
-    return navigate('/');
+    return <Navigate to="/" replace />;
   }
 
   const inviteToken = searchParams.get('token');

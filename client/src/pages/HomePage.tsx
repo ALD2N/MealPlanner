@@ -17,7 +17,7 @@ const FILTERS = [
   { id: 'transport', label: '🎒 Transport facile' },
 ];
 
-const SORT_OPTIONS = [
+const SORT_OPTIONS: Array<{ id: string; label: string; field: string | null; dir: -1 | 0 | 1 }> = [
   { id: 'magic', label: '✦ Magique', field: null, dir: 0 },
   { id: 'chosen-desc', label: 'Plus choisi', field: 'timesChosen', dir: -1 },
   { id: 'chosen-asc', label: 'Moins choisi', field: 'timesChosen', dir: 1 },

@@ -11,15 +11,15 @@ describe('RecipeCard', () => {
     image: 'https://example.com/pasta.jpg',
     ingredients: ['pasta', 'eggs', 'bacon'],
     steps: ['Boil pasta', 'Cook bacon', 'Mix and serve'],
-    author: { _id: 'author1', name: 'Chef Mario', email: 'mario@example.com', isAdmin: false, createdAt: new Date().toISOString() },
+    author: { _id: 'author1', name: 'Chef Mario', email: 'mario@example.com', isAdmin: false, createdAt: new Date() },
     tags: ['rapide', 'transport'],
     ratings: [
       { userId: 'user1', rating: 5 },
       { userId: 'user2', rating: 5 },
     ],
     timesChosen: 3,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   it('renders recipe title', () => {

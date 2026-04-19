@@ -78,7 +78,7 @@ export default function RecipeCard({ recipe, isNextMeal, onClick }: RecipeCardPr
           {stats.total > 0 ? (
             <>
               <span className="flex items-center gap-1">
-                <span className="text-base">{SMILEYS[stats.dominant - 1]}</span>
+                <span className="text-base">{SMILEYS[(stats.dominant ?? 1) - 1]}</span>
                 {stats.total} avis
               </span>
               <span className="flex items-center gap-1">◎ {recipe.timesChosen}×</span>

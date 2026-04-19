@@ -10,7 +10,7 @@ interface RecipeFormState {
   ingredients: string[];
   steps: string[];
   tags: string[];
-  errors: Record<string, string>;
+  errors: Record<string, string | undefined>;
   isLoading: boolean;
   globalError: string | null;
 }

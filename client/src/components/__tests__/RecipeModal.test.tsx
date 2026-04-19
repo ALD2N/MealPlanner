@@ -17,7 +17,7 @@ describe('RecipeModal', () => {
       name: 'Chef Mario',
       email: 'mario@example.com',
       isAdmin: false,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     },
     tags: ['rapide', 'transport'],
     ratings: [
@@ -26,8 +26,8 @@ describe('RecipeModal', () => {
       { userId: 'user3', rating: 5 },
     ],
     timesChosen: 3,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   const mockOnClose = vi.fn();
