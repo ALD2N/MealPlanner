@@ -30,24 +30,37 @@ export function useMealSelection() {
     }
   }, []);
 
-  const selectMeal = useCallback(
-    async (recipeId: string) => {
-      try {
-        const res = await api.post('/meals/select', { recipeId });
-        setCurrentMeal(res.data.meal);
-        return res.data.meal;
-      } catch (err: any) {
-        throw new Error(err.response?.data?.error || 'Failed to select meal');
-      }
-    },
-    []
-  );
+  const selectMeal = useCallback(async (recipeId: string) => {
+    const res = await api.post('/meals/select', { recipeId });
+    setCurrentMeal(res.data.meal);
+    return res.data.meal;
+  }, []);
 
-  // Fetch current meal and history on mount
+  const deselectMeal = useCallback(async () => {
+    await api.delete('/meals/current');
+    setCurrentMeal(null);
+  }, []);
+
+  const confirmMeal = useCallback(async () => {
+    await api.post('/meals/confirm');
+    setCurrentMeal(null);
+    await getHistory();
+  }, [getHistory]);
+
   useEffect(() => {
     getCurrentMeal();
     getHistory();
   }, [getCurrentMeal, getHistory]);
 
-  return { currentMeal, history, isLoading, error, getCurrentMeal, selectMeal, getHistory };
+  return {
+    currentMeal,
+    history,
+    isLoading,
+    error,
+    getCurrentMeal,
+    selectMeal,
+    deselectMeal,
+    confirmMeal,
+    getHistory,
+  };
 }
