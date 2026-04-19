@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../contexts/ToastContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { user, login, register, error, isLoading } = useAuth();
+  const { addToast } = useToast();
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,9 +26,11 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await login(email, password);
+      addToast('Bienvenue!', 'success');
       navigate('/');
-    } catch (err) {
-      // Error handled by useAuth
+    } catch (err: any) {
+      const message = err.response?.data?.error || 'Erreur lors de la connexion';
+      addToast(message, 'error');
     }
   };
 
@@ -34,9 +38,11 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await register(email, password, name, inviteToken || undefined);
+      addToast('Compte créé! Bienvenue!', 'success');
       navigate('/');
-    } catch (err) {
-      // Error handled by useAuth
+    } catch (err: any) {
+      const message = err.response?.data?.error || 'Erreur lors de l\'inscription';
+      addToast(message, 'error');
     }
   };
 

@@ -3,8 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useRecipes } from '../hooks/useRecipes';
 import { useMealSelection } from '../hooks/useMealSelection';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../contexts/ToastContext';
 import { IRecipeResponse } from '@dndmeal/shared';
 import RecipeCard from '../components/RecipeCard';
+import RecipeModal from '../components/RecipeModal';
+import FilterPills from '../components/FilterPills';
+import SortBar from '../components/SortBar';
 
 const FILTERS = [
   { id: 'vege', label: '🌿 Végétarien' },
@@ -25,6 +30,8 @@ export default function HomePage() {
   const { recipes, addRating } = useRecipes();
   const { currentMeal, selectMeal } = useMealSelection();
   const { on, off } = useWebSocket();
+  const { user } = useAuth();
+  const { addToast } = useToast();
 
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [activeSort, setActiveSort] = useState('magic');
@@ -104,6 +111,20 @@ export default function HomePage() {
     );
   };
 
+  const handleSelectMeal = async (recipeId: string) => {
+    try {
+      await selectMeal(recipeId);
+      addToast('Repas sélectionné pour demain!', 'success');
+      setSelectedRecipe(null);
+    } catch (err: any) {
+      const message =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        'Une erreur est survenue';
+      addToast(message, 'error');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -167,37 +188,20 @@ export default function HomePage() {
 
         {/* Filters */}
         <div className="mb-6">
-          <div className="flex gap-3 flex-wrap">
-            {FILTERS.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => toggleFilter(f.id)}
-                className={`px-4 py-2 rounded-full transition ${
-                  activeFilters.includes(f.id)
-                    ? 'bg-amber-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:border-amber-600'
-                }`}
-              >
-                {f.label} {activeFilters.includes(f.id) && '×'}
-              </button>
-            ))}
-          </div>
+          <FilterPills
+            filters={FILTERS}
+            activeFilters={activeFilters}
+            onToggle={toggleFilter}
+          />
         </div>
 
         {/* Sort */}
-        <div className="mb-6 flex items-center gap-3">
-          <span className="text-gray-600">Trier par</span>
-          <select
-            value={activeSort}
-            onChange={(e) => setActiveSort(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg bg-white"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+        <div className="mb-6">
+          <SortBar
+            options={SORT_OPTIONS}
+            activeSort={activeSort}
+            onSortChange={setActiveSort}
+          />
         </div>
 
         {/* Recipe Grid */}
@@ -221,69 +225,14 @@ export default function HomePage() {
 
       {/* Recipe Modal */}
       {selectedRecipe && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-96 overflow-auto">
-            <h2 className="text-2xl font-bold mb-4">{selectedRecipe.title}</h2>
-            <p className="text-gray-600 mb-4">par {selectedRecipe.author.name}</p>
-
-            {/* Ingredients */}
-            {selectedRecipe.ingredients.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-bold text-lg mb-2">Ingrédients</h3>
-                <ul className="list-disc list-inside text-sm text-gray-700">
-                  {selectedRecipe.ingredients.map((ing, idx) => (
-                    <li key={idx}>{ing}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Steps */}
-            {selectedRecipe.steps.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-bold text-lg mb-2">Étapes</h3>
-                <ol className="list-decimal list-inside text-sm text-gray-700">
-                  {selectedRecipe.steps.map((step, idx) => (
-                    <li key={idx}>{step}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
-
-            {/* Tags */}
-            {selectedRecipe.tags.length > 0 && (
-              <div className="mb-4 flex gap-2 flex-wrap">
-                {selectedRecipe.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 mt-6">
-              <button
-                onClick={async () => {
-                  await selectMeal(selectedRecipe._id);
-                  setSelectedRecipe(null);
-                }}
-                className="bg-amber-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-amber-700 transition flex-1"
-              >
-                Sélectionner pour demain
-              </button>
-              <button
-                onClick={() => setSelectedRecipe(null)}
-                className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition flex-1"
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
+        <RecipeModal
+          recipe={selectedRecipe}
+          isOpen={true}
+          onClose={() => setSelectedRecipe(null)}
+          onSelectMeal={handleSelectMeal}
+          onAddRating={(rating) => addRating(selectedRecipe._id, rating)}
+          currentUserId={user?._id}
+        />
       )}
     </div>
   );
