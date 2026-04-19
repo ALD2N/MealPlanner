@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DnDMeal - Recettes Collaboratives</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    
+    #root {
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    
+    // ========== DESIGN SYSTEM — Style B: Organique & Chaleureux ==========
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "theme": "light",
+      "accentColor": "soleil",
+      "cardStyle": "elevated",
+      "gridDensity": 4
+    }/*EDITMODE-END*/;
+
+    const ACCENT_PALETTES = {
+      soleil: { accent: '#d4a017', accentHover: '#b8880f', accentText: '#2d1f15', accentPale: '#fdf4d0' },
+      terra:  { accent: '#c4622d', accentHover: '#a8501f', accentText: '#fff8f0', accentPale: '#f5e8df' },
+      sage:   { accent: '#4a7c59', accentHover: '#3a6448', accentText: '#f0f7f2', accentPale: '#e2f0e7' },
+      indigo: { accent: '#4a5c8a', accentHover: '#384870', accentText: '#f0f2f8', accentPale: '#e2e6f3' },
+    };
+
+    const DesignSystem = {
+      getColors(tweaks) {
+        const isDark = tweaks.theme === 'dark';
+        const pal = ACCENT_PALETTES[tweaks.accentColor] || ACCENT_PALETTES.terra;
+
+        if (isDark) {
+          return {
+            bg: '#1c1712',
+            bgElevated: '#241f18',
+            bgHover: '#2e271e',
+            surface: '#221d16',
+            surfaceHover: '#2a2319',
+            border: '#3a3028',
+            text: '#f0e8dc',
+            textMuted: '#b09a86',
+            textSubtle: '#8a7464',
+            displayFont: "'Fraunces', serif",
+            bodyFont: "'DM Sans', sans-serif",
+            ...pal,
+          };
+        } else {
+          return {
+            bg: '#faf6f0',
+            bgElevated: '#fff8f0',
+            bgHover: '#f2ece3',
+            surface: '#fff8f0',
+            surfaceHover: '#f7f0e6',
+            border: '#e8ddd4',
+            text: '#2d1f15',
+            textMuted: '#9a7c6b',
+            textSubtle: '#b8a090',
+            displayFont: "'Fraunces', serif",
+            bodyFont: "'DM Sans', sans-serif",
+            ...pal,
+          };
+        }
+      },
+
+      spacing: {
+        xs: '4px',
+        sm: '8px',
+        md: '16px',
+        lg: '24px',
+        xl: '32px',
+        xxl: '48px',
+      },
+
+      radius: {
+        sm: '8px',
+        md: '14px',
+        lg: '18px',
+        xl: '24px',
+        pill: '999px',
+      },
+
+      shadow: {
+        sm: '0 2px 8px rgba(44,31,21,0.07)',
+        md: '0 4px 16px rgba(44,31,21,0.10)',
+        lg: '0 8px 28px rgba(44,31,21,0.14)',
+      }
+    };
+    
+    // ========== MOCK DATA ==========
+    const SMILEYS = ['😞','😕','😐','🙂','😄'];
+
+    function getRatingStats(ratings = {}) {
+      const total = Object.values(ratings).reduce((s, v) => s + v, 0);
+      if (total === 0) return { total: 0, dominant: null, avg: 0 };
+      let maxCount = 0, dominant = 1;
+      let weightedSum = 0;
+      for (let i = 1; i <= 5; i++) {
+        const c = ratings[i] || 0;
+        weightedSum += i * c;
+        if (c > maxCount) { maxCount = c; dominant = i; }
+      }
+      return { total, dominant, avg: weightedSum / total };
+    }
+
+    const MOCK_RECIPES = [
+      {
+        id: 1, title: "Risotto aux champignons",
+        image: "https://picsum.photos/seed/risotto/800/600",
+        ingredients: ["Riz arborio", "Champignons", "Bouillon", "Parmesan", "Vin blanc"],
+        steps: ["Faire revenir les champignons", "Ajouter le riz", "Incorporer le bouillon progressivement", "Terminer avec le parmesan"],
+        author: "Marie", tags: ["vege"],
+        timesChosen: 7, ratings: {1:0,2:1,3:1,4:3,5:7},
+      },
+      {
+        id: 2, title: "Salade César",
+        image: "https://picsum.photos/seed/salad/800/600",
+        ingredients: ["Laitue romaine", "Poulet grillé", "Parmesan", "Croûtons", "Sauce césar"],
+        steps: ["Griller le poulet", "Préparer la sauce", "Assembler la salade"],
+        author: "Thomas", tags: ["rapide", "transport"],
+        timesChosen: 3, ratings: {1:0,2:0,3:2,4:2,5:1},
+      },
+      {
+        id: 3, title: "Pâtes carbonara",
+        image: "https://picsum.photos/seed/pasta/800/600",
+        ingredients: ["Spaghetti", "Guanciale", "Œufs", "Pecorino", "Poivre noir"],
+        steps: ["Cuire les pâtes", "Faire revenir le guanciale", "Mélanger œufs et fromage", "Combiner le tout"],
+        author: "Sophie", tags: ["rapide"],
+        timesChosen: 11, ratings: {1:0,2:0,3:1,4:4,5:13},
+      },
+      {
+        id: 4, title: "Curry de légumes",
+        image: "https://picsum.photos/seed/curry/800/600",
+        ingredients: ["Légumes variés", "Lait de coco", "Pâte de curry", "Riz basmati"],
+        steps: ["Faire revenir les légumes", "Ajouter le curry et le lait de coco", "Laisser mijoter", "Servir avec le riz"],
+        author: "Lucas", tags: ["vege"],
+        timesChosen: 5, ratings: {1:1,2:1,3:2,4:3,5:2},
+      },
+      {
+        id: 5, title: "Tarte tatin",
+        image: "https://picsum.photos/seed/tarte/800/600",
+        ingredients: ["Pommes", "Pâte feuilletée", "Beurre", "Sucre"],
+        steps: ["Caraméliser le sucre", "Ajouter les pommes", "Recouvrir de pâte", "Cuire et retourner"],
+        author: "Emma", tags: ["vege", "transport"],
+        timesChosen: 2, ratings: {1:0,2:1,3:1,4:1,5:1},
+      },
+      {
+        id: 6, title: "Burger maison",
+        image: "https://picsum.photos/seed/burger/800/600",
+        ingredients: ["Pain burger", "Steak haché", "Cheddar", "Salade", "Tomate", "Oignons"],
+        steps: ["Griller le pain", "Cuire le steak", "Assembler le burger"],
+        author: "Antoine", tags: ["rapide", "transport"],
+        timesChosen: 9, ratings: {1:0,2:0,3:2,4:5,5:7},
+      },
+      {
+        id: 7, title: "Soupe miso",
+        author: "Léa", tags: ["vege", "rapide"],
+        timesChosen: 1, ratings: {1:1,2:0,3:1,4:0,5:0},
+      },
+      {
+        id: 8, title: "Quiche lorraine",
+        image: "https://picsum.photos/seed/quiche/800/600",
+        ingredients: ["Pâte brisée", "Lardons", "Œufs", "Crème fraîche", "Gruyère"],
+        author: "Paul", tags: ["transport"],
+        timesChosen: 4, ratings: {1:0,2:1,3:2,4:4,5:3},
+      }
+    ];
+    
+    // ========== COMPONENTS ==========
+    
+    function Header({ tweaks, onNavigate, currentPage, onToggleTheme }) {
+      const colors = DesignSystem.getColors(tweaks);
+      const isDark = tweaks.theme === 'dark';
+
+      return (
+        <header style={{
+          position: 'sticky', top: 0, zIndex: 100,
+          background: colors.bgElevated,
+          borderBottom: `1.5px solid ${colors.border}`,
+          padding: `18px 28px`,
+        }}>
+          <div style={{maxWidth:'1400px', margin:'0 auto', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'12px'}}>
+            <div
+              style={{cursor:'pointer', display:'flex', alignItems:'baseline', gap:'2px', flexShrink:0}}
+              onClick={() => onNavigate('home')}
+            >
+              <span style={{fontFamily: colors.displayFont, fontSize:'26px', fontWeight:600, color: colors.text}}>DnD</span>
+              <span style={{fontFamily: colors.displayFont, fontSize:'26px', fontWeight:300, fontStyle:'italic', color: colors.accent}}>Meal</span>
+            </div>
+            <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+              {/* Theme toggle */}
+              <button
+                onClick={onToggleTheme}
+                title={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
+                style={{
+                  background: colors.surface,
+                  border: `1.5px solid ${colors.border}`,
+                  width: '40px', height: '40px',
+                  borderRadius: '50%',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.2s',
+                  flexShrink: 0,
+                }}
+              >
+                {isDark ? '☀️' : '🌙'}
+              </button>
+              {currentPage === 'home' && (
+                <button
+                  style={{
+                    background: colors.accent,
+                    color: colors.accentText,
+                    border: 'none',
+                    padding: `10px 24px`,
+                    borderRadius: DesignSystem.radius.pill,
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'background 0.2s',
+                    fontFamily: colors.bodyFont,
+                    whiteSpace: 'nowrap',
+                  }}
+                  onClick={() => onNavigate('add-recipe')}
+                  onMouseEnter={e => e.currentTarget.style.background = colors.accentHover}
+                  onMouseLeave={e => e.currentTarget.style.background = colors.accent}
+                >
+                  + Ajouter une recette
+                </button>
+              )}
+            </div>
+          </div>
+        </header>
+      );
+    }
+    
+    function NextMealBanner({ recipe, tweaks, onSelectMeal, onViewRecipe }) {
+      const colors = DesignSystem.getColors(tweaks);
+
+      if (!recipe) {
+        return (
+          <div style={{
+            background: colors.accentPale,
+            padding: DesignSystem.spacing.xxl,
+            borderRadius: DesignSystem.radius.xl,
+            marginBottom: DesignSystem.spacing.xl,
+          }}>
+            <div style={{fontSize:'11px', fontWeight:700, letterSpacing:'2px', color:colors.accent, textTransform:'uppercase', marginBottom:'8px'}}>Ce soir on mange</div>
+            <div style={{fontFamily:colors.displayFont, fontSize:'32px', fontWeight:600, color:colors.text}}>Aucun repas sélectionné</div>
+            <div style={{fontSize:'15px', color:colors.textMuted, marginTop:'8px'}}>Choisissez une recette ci-dessous</div>
+          </div>
+        );
+      }
+
+      return (
+        <div style={{
+          background: colors.accent,
+          borderRadius: DesignSystem.radius.xl,
+          marginBottom: DesignSystem.spacing.xl,
+          overflow: 'hidden',
+          display: 'flex',
+          minHeight: '220px',
+        }}>
+          <div style={{flex:1, padding: DesignSystem.spacing.xxl, display:'flex', flexDirection:'column', justifyContent:'center', position:'relative'}}>
+            <div style={{position:'absolute', top:-40, right:-40, width:200, height:200, background:'rgba(255,255,255,0.07)', borderRadius:'50%'}}/>
+            <div style={{position:'absolute', bottom:-50, left:60, width:120, height:120, background:'rgba(255,255,255,0.05)', borderRadius:'50%'}}/>
+            <div style={{fontSize:'11px', fontWeight:700, letterSpacing:'2px', color:colors.accentText, opacity:0.75, textTransform:'uppercase', marginBottom:'10px', position:'relative'}}>Ce soir on mange</div>
+            <div style={{fontFamily:colors.displayFont, fontSize:'38px', fontWeight:600, color:colors.accentText, lineHeight:1.15, marginBottom:'6px', position:'relative'}}>{recipe.title}</div>
+            <div style={{fontSize:'14px', color:colors.accentText, opacity:0.8, marginBottom:'24px', position:'relative'}}>
+              par {recipe.author} · ♥ {recipe.likes ?? 0} · choisi {recipe.timesChosen ?? 0}×
+            </div>
+            <div style={{display:'flex', gap:'12px', position:'relative'}}>
+              <button
+                style={{background:colors.accentText, color:colors.accent, border:'none', padding:'11px 26px', borderRadius:DesignSystem.radius.pill, fontSize:'14px', fontWeight:600, cursor:'pointer'}}
+                onClick={() => onViewRecipe(recipe)}
+              >
+                Voir la recette
+              </button>
+              <button
+                style={{background:'transparent', color:colors.accentText, border:`1.5px solid ${colors.accentText}`, padding:'11px 22px', borderRadius:DesignSystem.radius.pill, fontSize:'14px', fontWeight:500, cursor:'pointer', opacity:0.85}}
+                onClick={onSelectMeal}
+              >
+                Changer
+              </button>
+            </div>
+          </div>
+          {recipe.image && (
+            <div style={{width:'280px', flexShrink:0, overflow:'hidden'}}>
+              <img src={recipe.image} alt={recipe.title} style={{width:'100%', height:'100%', objectFit:'cover'}} />
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    const SORT_OPTIONS = [
+      { id: 'magic',       label: '✦ Magique',      field: null,         dir: 0 },
+      { id: 'chosen-desc', label: 'Plus choisi',    field: 'timesChosen', dir: -1 },
+      { id: 'chosen-asc',  label: 'Moins choisi',   field: 'timesChosen', dir: 1 },
+      { id: 'rating-desc', label: 'Mieux noté',     field: '_avg',        dir: -1 },
+      { id: 'rating-asc',  label: 'Moins bien noté',field: '_avg',        dir: 1 },
+    ];
+
+    function SortBar({ tweaks, activeSort, onChange }) {
+      const colors = DesignSystem.getColors(tweaks);
+      return (
+        <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom: DesignSystem.spacing.xl}}>
+          <span style={{fontSize:'13px', fontWeight:500, color:colors.textSubtle}}>Trier par</span>
+          <select
+            value={activeSort}
+            onChange={e => onChange(e.target.value)}
+            style={{
+              padding:'8px 14px',
+              background: colors.surface,
+              border:`1.5px solid ${colors.border}`,
+              borderRadius: DesignSystem.radius.pill,
+              color: colors.text,
+              fontSize:'14px',
+              fontFamily: colors.bodyFont,
+              cursor:'pointer',
+              outline:'none',
+              appearance:'none',
+              paddingRight:'32px',
+              backgroundImage:`url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%239a7c6b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+              backgroundRepeat:'no-repeat',
+              backgroundPosition:'right 12px center',
+            }}
+          >
+            {SORT_OPTIONS.map(o => (
+              <option key={o.id} value={o.id}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+      );
+    }
+
+    function RecipeCard({ recipe, tweaks, onClick, onSetNextMeal, isNextMeal }) {
+      const colors = DesignSystem.getColors(tweaks);
+      const [isHovered, setIsHovered] = useState(false);
+      const cardStyle = tweaks.cardStyle;
+
+      const styleVariants = {
+        elevated: {
+          background: colors.surface,
+          borderRadius: DesignSystem.radius.lg,
+          overflow: 'hidden',
+          cursor: 'pointer',
+          transition: 'all 0.25s cubic-bezier(0.4,0,0.2,1)',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: isHovered ? DesignSystem.shadow.lg : DesignSystem.shadow.sm,
+          transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        },
+        bordered: {
+          background: colors.surface,
+          borderRadius: DesignSystem.radius.lg,
+          overflow: 'hidden',
+          cursor: 'pointer',
+          transition: 'all 0.25s cubic-bezier(0.4,0,0.2,1)',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          border: `1.5px solid ${isHovered ? colors.accent : colors.border}`,
+          transform: isHovered ? 'translateY(-2px)' : 'none',
+        },
+        flat: {
+          background: isHovered ? colors.surfaceHover : colors.surface,
+          borderRadius: DesignSystem.radius.lg,
+          overflow: 'hidden',
+          cursor: 'pointer',
+          transition: 'background 0.2s',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      };
+
+      const cardStyles = styleVariants[cardStyle] || styleVariants.elevated;
+
+      return (
+        <div
+          style={cardStyles}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={onClick}
+        >
+          {/* Image */}
+          <div style={{width:'100%', paddingTop:'66.67%', position:'relative', background:colors.bgHover, overflow:'hidden'}}>
+            {isNextMeal && (
+              <div style={{position:'absolute', top:10, right:10, background:colors.accent, color:colors.accentText, padding:'4px 12px', borderRadius:DesignSystem.radius.pill, fontSize:'11px', fontWeight:600, zIndex:2, letterSpacing:'0.3px'}}>
+                Ce soir ✦
+              </div>
+            )}
+            {recipe.image
+              ? <img src={recipe.image} alt={recipe.title} style={{position:'absolute', top:0, left:0, width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.35s', transform: isHovered ? 'scale(1.06)' : 'scale(1)'}} />
+              : <div style={{position:'absolute', top:0, left:0, width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'11px', fontFamily:'monospace', color:colors.textSubtle}}>[ photo recette ]</div>
+            }
+          </div>
+
+          {/* Content */}
+          <div style={{padding:'16px 18px 18px', flex:1, display:'flex', flexDirection:'column'}}>
+            <div style={{fontFamily:colors.displayFont, fontSize:'17px', fontWeight:600, color:colors.text, marginBottom:'4px', lineHeight:1.3}}>{recipe.title}</div>
+            <div style={{fontSize:'13px', color:colors.textMuted, marginBottom:'12px'}}>par {recipe.author}</div>
+            {recipe.ingredients && (
+              <div style={{display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'10px'}}>
+                <span style={{fontSize:'12px', padding:'3px 10px', background:colors.bgHover, color:colors.textSubtle, borderRadius:DesignSystem.radius.pill}}>{recipe.ingredients.length} ingrédients</span>
+                {recipe.steps && <span style={{fontSize:'12px', padding:'3px 10px', background:colors.bgHover, color:colors.textSubtle, borderRadius:DesignSystem.radius.pill}}>{recipe.steps.length} étapes</span>}
+              </div>
+            )}
+            <div style={{display:'flex', gap:'16px', marginTop:'auto', paddingTop:'10px', borderTop:`1px solid ${colors.border}`}}>
+              {(() => {
+                const stats = getRatingStats(recipe.ratings);
+                return stats.total > 0 ? (
+                  <>
+                    <span style={{fontSize:'13px', color:colors.textMuted, display:'flex', alignItems:'center', gap:'4px'}}>
+                      <span>{SMILEYS[stats.dominant - 1]}</span>
+                      <span>{stats.total} avis</span>
+                    </span>
+                    <span style={{fontSize:'13px', color:colors.textMuted, display:'flex', alignItems:'center', gap:'4px'}}>
+                      ◎ {recipe.timesChosen ?? 0}×
+                    </span>
+                  </>
+                ) : (
+                  <span style={{fontSize:'13px', color:colors.textSubtle}}>◎ {recipe.timesChosen ?? 0}×</span>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    function RecipeModal({ recipe, tweaks, onClose, onSetNextMeal, isNextMeal, onRate, onEdit }) {
+      const colors = DesignSystem.getColors(tweaks);
+
+      useEffect(() => {
+        const handleEscape = (e) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+      }, [onClose]);
+
+      return (
+        <div
+          style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(44,31,21,0.6)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'24px', animation:'fadeIn 0.2s'}}
+          onClick={onClose}
+        >
+          <div
+            style={{background:colors.bgElevated, borderRadius:'24px', maxWidth:'860px', width:'100%', maxHeight:'90vh', overflow:'auto', boxShadow:'0 24px 64px rgba(44,31,21,0.25)', animation:'slideUp 0.3s', position:'relative'}}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={onClose}
+              style={{position:'absolute', top:'16px', right:'16px', background:colors.surface, border:'none', width:'38px', height:'38px', borderRadius:'50%', fontSize:'20px', cursor:'pointer', color:colors.textMuted, display:'flex', alignItems:'center', justifyContent:'center', zIndex:2}}
+            >×</button>
+
+            {/* Image */}
+            {recipe.image
+              ? <img src={recipe.image} alt={recipe.title} style={{width:'100%', height:'380px', objectFit:'cover', borderRadius:'24px 24px 0 0'}} />
+              : <div style={{width:'100%', height:'220px', background:colors.bgHover, borderRadius:'24px 24px 0 0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'11px', fontFamily:'monospace', color:colors.textSubtle}}>[ photo recette ]</div>
+            }
+
+            <div style={{padding:'32px 36px 36px'}}>
+              <div style={{marginBottom:'28px'}}>
+                <h2 style={{fontFamily:colors.displayFont, fontSize:'34px', fontWeight:600, color:colors.text, marginBottom:'6px', lineHeight:1.2}}>{recipe.title}</h2>
+                <div style={{fontSize:'15px', color:colors.textMuted, marginBottom:'14px'}}>par {recipe.author} · choisi {recipe.timesChosen ?? 0}×</div>
+                {/* Rating distribution */}
+                {(() => {
+                  const stats = getRatingStats(recipe.ratings);
+                  return (
+                    <div style={{background:colors.bgHover, borderRadius:DesignSystem.radius.md, padding:'14px 18px'}}>
+                      <div style={{fontSize:'12px', fontWeight:600, color:colors.textSubtle, textTransform:'uppercase', letterSpacing:'0.8px', marginBottom:'10px'}}>
+                        {stats.total > 0 ? `${stats.total} avis` : 'Aucun avis encore'}
+                      </div>
+                      <div style={{display:'flex', gap:'6px', alignItems:'flex-end'}}>
+                        {SMILEYS.map((emoji, i) => {
+                          const count = (recipe.ratings || {})[i+1] || 0;
+                          const pct = stats.total > 0 ? (count / stats.total) * 100 : 0;
+                          return (
+                            <div key={i} style={{flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:'4px'}}>
+                              <div style={{fontSize:'11px', color:colors.textSubtle}}>{count > 0 ? count : ''}</div>
+                              <div style={{
+                                width:'100%', height:`${Math.max(4, pct * 0.6)}px`,
+                                background: pct > 0 ? colors.accent : colors.border,
+                                borderRadius:'3px', minHeight:'4px', transition:'height 0.3s',
+                                opacity: pct > 0 ? 1 : 0.4,
+                              }}/>
+                              <div style={{fontSize:'20px'}}>{emoji}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Ingredients */}
+              {recipe.ingredients && recipe.ingredients.length > 0 && (
+                <div style={{marginBottom:'24px'}}>
+                  <h3 style={{fontFamily:colors.displayFont, fontSize:'20px', fontWeight:600, color:colors.text, marginBottom:'14px'}}>Ingrédients</h3>
+                  <ul style={{listStyle:'none', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px'}}>
+                    {recipe.ingredients.map((ing,i) => (
+                      <li key={i} style={{fontSize:'14px', color:colors.textMuted, padding:'8px 12px', background:colors.bgHover, borderRadius:DesignSystem.radius.sm}}>· {ing}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Steps */}
+              {recipe.steps && recipe.steps.length > 0 && (
+                <div style={{marginBottom:'28px'}}>
+                  <h3 style={{fontFamily:colors.displayFont, fontSize:'20px', fontWeight:600, color:colors.text, marginBottom:'14px'}}>Préparation</h3>
+                  {recipe.steps.map((step,i) => (
+                    <div key={i} style={{display:'flex', gap:'14px', marginBottom:'10px', alignItems:'flex-start'}}>
+                      <div style={{flexShrink:0, width:'28px', height:'28px', background:colors.accent, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px', fontWeight:700, color:colors.accentText}}>{i+1}</div>
+                      <div style={{fontSize:'14px', color:colors.textMuted, paddingTop:'4px'}}>{step}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!recipe.ingredients && !recipe.steps && (
+                <div style={{color:colors.textSubtle, fontStyle:'italic', marginBottom:'28px', fontSize:'14px'}}>Cette recette n'a pas encore de détails.</div>
+              )}
+
+              {/* Actions */}
+              <div style={{paddingTop:'20px', borderTop:`1px solid ${colors.border}`}}>
+                {/* Smiley rater */}
+                <div style={{marginBottom:'16px'}}>
+                  <div style={{fontSize:'13px', fontWeight:600, color:colors.textMuted, marginBottom:'10px'}}>Votre avis sur cette recette :</div>
+                  <div style={{display:'flex', gap:'8px'}}>
+                    {SMILEYS.map((emoji, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        title={['Pas du tout', 'Moyen', 'Correct', 'Bien', 'Excellent'][i]}
+                        onClick={e => { e.stopPropagation(); onRate(recipe.id, i+1); }}
+                        style={{
+                          flex:1, fontSize:'28px', padding:'10px 4px',
+                          background:colors.bgHover, border:`1.5px solid ${colors.border}`,
+                          borderRadius:DesignSystem.radius.md, cursor:'pointer',
+                          transition:'all 0.15s', lineHeight:1,
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = colors.accentPale; e.currentTarget.style.borderColor = colors.accent; e.currentTarget.style.transform = 'scale(1.12)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = colors.bgHover; e.currentTarget.style.borderColor = colors.border; e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{display:'flex', gap:'10px', flexWrap:'wrap'}}>
+                  <button
+                    style={{flex:1, background:colors.accent, color:colors.accentText, border:'none', padding:'13px', borderRadius:DesignSystem.radius.pill, fontSize:'14px', fontWeight:600, cursor:'pointer', fontFamily:colors.bodyFont, minWidth:'160px'}}
+                    onClick={e => { e.stopPropagation(); onSetNextMeal(recipe); onClose(); }}
+                  >
+                    {isNextMeal ? '✓ Prochain repas actuel' : 'Définir comme prochain repas'}
+                  </button>
+                  <button
+                    style={{background:'transparent', color:colors.textMuted, border:`1.5px solid ${colors.border}`, padding:'13px 20px', borderRadius:DesignSystem.radius.pill, fontSize:'14px', cursor:'pointer', fontFamily:colors.bodyFont}}
+                    onClick={e => { e.stopPropagation(); onEdit(recipe); onClose(); }}
+                  >
+                    ✎ Modifier
+                  </button>
+                  <button
+                    style={{background:'transparent', color:colors.textMuted, border:`1.5px solid ${colors.border}`, padding:'13px 22px', borderRadius:DesignSystem.radius.pill, fontSize:'14px', cursor:'pointer', fontFamily:colors.bodyFont}}
+                    onClick={onClose}
+                  >
+                    Fermer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <style>{`
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+          `}</style>
+        </div>
+      );
+    }
+    
+    const FILTERS = [
+      { id: 'vege', label: '🌿 Végétarien' },
+      { id: 'transport', label: '🎒 Transport facile' },
+      { id: 'rapide', label: '⚡ Recette rapide' },
+    ];
+
+    function FilterPills({ tweaks, activeFilters, onToggle }) {
+      const colors = DesignSystem.getColors(tweaks);
+
+      const wrapperStyles = {
+        display: 'flex',
+        gap: DesignSystem.spacing.sm,
+        flexWrap: 'wrap',
+        marginBottom: DesignSystem.spacing.xl,
+      };
+
+      return (
+        <div style={wrapperStyles}>
+          {FILTERS.map(f => {
+            const active = activeFilters.includes(f.id);
+            const pillStyles = {
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: `8px 18px`,
+              borderRadius: '999px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              border: `1.5px solid ${active ? colors.accent : colors.border}`,
+              background: active ? colors.accent : 'transparent',
+              color: active ? colors.accentText : colors.textMuted,
+              transition: 'all 0.18s cubic-bezier(0.4,0,0.2,1)',
+              userSelect: 'none',
+            };
+            return (
+              <button
+                key={f.id}
+                style={pillStyles}
+                onClick={() => onToggle(f.id)}
+                onMouseEnter={e => {
+                  if (!active) {
+                    e.currentTarget.style.borderColor = colors.accent;
+                    e.currentTarget.style.color = colors.text;
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!active) {
+                    e.currentTarget.style.borderColor = colors.border;
+                    e.currentTarget.style.color = colors.textMuted;
+                  }
+                }}
+              >
+                {f.label}
+                {active && (
+                  <span style={{fontSize: '16px', lineHeight: 1, marginLeft: '2px', opacity: 0.8}}>×</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function HomePage({ tweaks, recipes, nextMeal, onSelectNextMeal, onViewRecipe }) {
+      const colors = DesignSystem.getColors(tweaks);
+      const [activeFilters, setActiveFilters] = useState([]);
+      const [activeSort, setActiveSort] = useState('magic');
+
+      const toggleFilter = (id) => {
+        setActiveFilters(prev =>
+          prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+        );
+      };
+
+      const filtered = activeFilters.length === 0
+        ? recipes
+        : recipes.filter(r => activeFilters.every(f => (r.tags || []).includes(f)));
+
+      const sortOpt = SORT_OPTIONS.find(o => o.id === activeSort);
+      const filteredRecipes = React.useMemo(() => {
+        if (!sortOpt || sortOpt.id === 'magic') {
+          return [...filtered].sort(() => Math.random() - 0.5);
+        }
+        return [...filtered].sort((a, b) => {
+          const getVal = (r) => sortOpt.field === '_avg' ? getRatingStats(r.ratings).avg : (r[sortOpt.field] ?? 0);
+          return (getVal(a) - getVal(b)) * sortOpt.dir;
+        });
+      }, [activeSort, filtered.map(r=>r.id).join(','), filtered.map(r=>JSON.stringify(r.ratings)).join(',')]);
+
+      const containerStyles = {
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: DesignSystem.spacing.xl,
+        minHeight: 'calc(100vh - 80px)',
+      };
+
+      const sectionHeaderStyles = {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: DesignSystem.spacing.md,
+        marginBottom: DesignSystem.spacing.lg,
+      };
+
+      const sectionTitleStyles = {
+        fontSize: '28px',
+        fontWeight: 600,
+        color: colors.text,
+        fontFamily: colors.displayFont,
+      };
+
+      const countStyles = {
+        fontSize: '15px',
+        color: colors.textSubtle,
+      };
+
+      const getGridColumns = () => {
+        switch(tweaks.gridDensity) {
+          case 2: return 'repeat(auto-fill, minmax(400px, 1fr))';
+          case 3: return 'repeat(auto-fill, minmax(320px, 1fr))';
+          case 4: return 'repeat(auto-fill, minmax(280px, 1fr))';
+          default: return 'repeat(auto-fill, minmax(320px, 1fr))';
+        }
+      };
+
+      const gridStyles = {
+        display: 'grid',
+        gridTemplateColumns: getGridColumns(),
+        gap: DesignSystem.spacing.lg,
+      };
+
+      const emptyStyles = {
+        gridColumn: '1 / -1',
+        textAlign: 'center',
+        padding: DesignSystem.spacing.xxl,
+        color: colors.textSubtle,
+        fontSize: '16px',
+      };
+
+      return (
+        <div style={containerStyles}>
+          <NextMealBanner
+            recipe={nextMeal}
+            tweaks={tweaks}
+            onSelectMeal={() => {}}
+            onViewRecipe={onViewRecipe}
+          />
+
+          <div style={sectionHeaderStyles}>
+            <h2 style={sectionTitleStyles}>Toutes les recettes</h2>
+            {activeFilters.length > 0 && (
+              <span style={countStyles}>{filteredRecipes.length} résultat{filteredRecipes.length !== 1 ? 's' : ''}</span>
+            )}
+          </div>
+
+          <FilterPills tweaks={tweaks} activeFilters={activeFilters} onToggle={toggleFilter} />
+          <SortBar tweaks={tweaks} activeSort={activeSort} onChange={setActiveSort} />
+
+          <div style={gridStyles}>
+            {filteredRecipes.length === 0 ? (
+              <div style={emptyStyles}>Aucune recette ne correspond à ces filtres.</div>
+            ) : filteredRecipes.map(recipe => (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                tweaks={tweaks}
+                onClick={() => onViewRecipe(recipe)}
+                onSetNextMeal={() => onSelectNextMeal(recipe)}
+                isNextMeal={nextMeal?.id === recipe.id}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    function AddRecipePage({ tweaks, onNavigate, onAddRecipe, currentUser, editRecipe }) {
+      const colors = DesignSystem.getColors(tweaks);
+      const isEditing = !!editRecipe;
+
+      const [title, setTitle] = useState(editRecipe?.title || '');
+      const [imagePreview, setImagePreview] = useState(editRecipe?.image || null);
+      const [ingredients, setIngredients] = useState(editRecipe?.ingredients?.length ? editRecipe.ingredients : ['']);
+      const [steps, setSteps] = useState(editRecipe?.steps?.length ? editRecipe.steps : ['']);
+
+      const inputStyle = {
+        width:'100%', padding:'12px 14px', fontSize:'14px',
+        border:`1.5px solid ${colors.border}`, borderRadius:DesignSystem.radius.md,
+        background:colors.bg, color:colors.text, fontFamily:colors.bodyFont, outline:'none',
+        transition:'border-color 0.2s',
+      };
+
+      const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => setImagePreview(ev.target.result);
+        reader.readAsDataURL(file);
+      };
+
+      // Dynamic list helpers
+      const updateList = (list, setList, idx, val) => {
+        const next = [...list]; next[idx] = val; setList(next);
+      };
+      const addItem = (list, setList) => setList([...list, '']);
+      const removeItem = (list, setList, idx) => {
+        if (list.length === 1) return;
+        setList(list.filter((_, i) => i !== idx));
+      };
+      const moveItem = (list, setList, idx, dir) => {
+        const next = [...list];
+        const target = idx + dir;
+        if (target < 0 || target >= next.length) return;
+        [next[idx], next[target]] = [next[target], next[idx]];
+        setList(next);
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!title.trim()) return;
+        onAddRecipe({
+          id: editRecipe?.id || Date.now(),
+          title,
+          author: editRecipe?.author || currentUser || 'Anonyme',
+          image: imagePreview || null,
+          ingredients: ingredients.filter(i => i.trim()),
+          steps: steps.filter(s => s.trim()),
+          timesChosen: editRecipe?.timesChosen || 0,
+          likes: editRecipe?.likes || 0,
+        });
+        onNavigate('home');
+      };
+
+      const sectionTitle = (text) => (
+        <div style={{fontFamily:colors.displayFont, fontSize:'20px', fontWeight:600, color:colors.text, marginBottom:'16px', marginTop:'32px'}}>{text}</div>
+      );
+
+      const DynamicList = ({ list, setList, placeholder, numbered }) => (
+        <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+          {list.map((item, idx) => (
+            <div key={idx} style={{display:'flex', gap:'8px', alignItems:'center'}}>
+              {numbered && (
+                <div style={{flexShrink:0, width:'26px', height:'26px', background:colors.accent, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px', fontWeight:700, color:colors.accentText}}>{idx+1}</div>
+              )}
+              {!numbered && (
+                <div style={{flexShrink:0, width:'8px', height:'8px', borderRadius:'50%', background:colors.accent, marginLeft:'4px'}}/>
+              )}
+              <input
+                type="text"
+                style={{...inputStyle, flex:1}}
+                value={item}
+                onChange={e => updateList(list, setList, idx, e.target.value)}
+                placeholder={`${placeholder} ${idx+1}`}
+                onFocus={e => e.target.style.borderColor = colors.accent}
+                onBlur={e => e.target.style.borderColor = colors.border}
+              />
+              <div style={{display:'flex', gap:'4px', flexShrink:0}}>
+                <button type="button" onClick={() => moveItem(list, setList, idx, -1)} disabled={idx===0}
+                  style={{width:'28px', height:'28px', background:'none', border:`1px solid ${colors.border}`, borderRadius:'6px', cursor:'pointer', color:colors.textMuted, fontSize:'12px', opacity:idx===0?0.3:1}}>↑</button>
+                <button type="button" onClick={() => moveItem(list, setList, idx, 1)} disabled={idx===list.length-1}
+                  style={{width:'28px', height:'28px', background:'none', border:`1px solid ${colors.border}`, borderRadius:'6px', cursor:'pointer', color:colors.textMuted, fontSize:'12px', opacity:idx===list.length-1?0.3:1}}>↓</button>
+                <button type="button" onClick={() => removeItem(list, setList, idx)} disabled={list.length===1}
+                  style={{width:'28px', height:'28px', background:'none', border:`1px solid ${colors.border}`, borderRadius:'6px', cursor:'pointer', color:'#e05c5c', fontSize:'14px', opacity:list.length===1?0.3:1}}>×</button>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => addItem(list, setList)}
+            style={{
+              alignSelf:'flex-start', display:'flex', alignItems:'center', gap:'6px',
+              background:'transparent', border:`1.5px dashed ${colors.border}`,
+              color:colors.textMuted, padding:'8px 16px', borderRadius:DesignSystem.radius.pill,
+              fontSize:'13px', fontWeight:500, cursor:'pointer', transition:'all 0.15s',
+              fontFamily:colors.bodyFont,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = colors.accent; e.currentTarget.style.color = colors.accent; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = colors.border; e.currentTarget.style.color = colors.textMuted; }}
+          >
+            + Ajouter
+          </button>
+        </div>
+      );
+
+      return (
+        <div style={{maxWidth:'680px', margin:'0 auto', padding:'40px 24px 80px', fontFamily:colors.bodyFont}}>
+          <div style={{cursor:'pointer', fontSize:'13px', color:colors.textMuted, marginBottom:'24px', display:'inline-flex', alignItems:'center', gap:'6px'}}
+            onClick={() => onNavigate('home')}>← Retour</div>
+          <h1 style={{fontFamily:colors.displayFont, fontSize:'36px', fontWeight:600, color:colors.text, marginBottom:'32px'}}>{isEditing ? 'Modifier la recette' : 'Ajouter une recette'}</h1>
+
+          <form onSubmit={handleSubmit}>
+            {/* Infos de base */}
+            <div style={{background:colors.surface, padding:'28px', borderRadius:'20px', boxShadow:DesignSystem.shadow.sm, marginBottom:'16px'}}>
+              <div style={{fontFamily:colors.displayFont, fontSize:'20px', fontWeight:600, color:colors.text, marginBottom:'20px'}}>Informations</div>
+              <label style={{display:'block', fontSize:'13px', fontWeight:600, color:colors.text, marginBottom:'7px'}}>Titre <span style={{color:colors.accent}}>*</span></label>
+              <input type="text" style={{...inputStyle, marginBottom:'0'}} value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Risotto aux champignons" required
+                onFocus={e => e.target.style.borderColor = colors.accent}
+                onBlur={e => e.target.style.borderColor = colors.border}
+              />
+              <div style={{marginTop:'12px', fontSize:'13px', color:colors.textMuted}}>
+                Par <strong>{currentUser}</strong>
+              </div>
+            </div>
+
+            {/* Image */}
+            <div style={{background:colors.surface, padding:'28px', borderRadius:'20px', boxShadow:DesignSystem.shadow.sm, marginBottom:'16px'}}>
+              <div style={{fontFamily:colors.displayFont, fontSize:'20px', fontWeight:600, color:colors.text, marginBottom:'20px'}}>Photo</div>
+              <input type="file" id="imgUpload" accept="image/*" style={{display:'none'}} onChange={handleImageUpload} />
+              {imagePreview ? (
+                <div style={{position:'relative'}}>
+                  <img src={imagePreview} alt="preview" style={{width:'100%', height:'220px', objectFit:'cover', borderRadius:DesignSystem.radius.lg}} />
+                  <button type="button" onClick={() => setImagePreview(null)}
+                    style={{position:'absolute', top:'10px', right:'10px', background:'rgba(0,0,0,0.5)', color:'#fff', border:'none', width:'32px', height:'32px', borderRadius:'50%', cursor:'pointer', fontSize:'16px', display:'flex', alignItems:'center', justifyContent:'center'}}>
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <label htmlFor="imgUpload" style={{
+                  display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                  gap:'10px', padding:'36px', border:`2px dashed ${colors.border}`,
+                  borderRadius:DesignSystem.radius.lg, cursor:'pointer', transition:'all 0.2s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = colors.accent; e.currentTarget.style.background = colors.accentPale; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = colors.border; e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <div style={{fontSize:'32px'}}>📷</div>
+                  <div style={{fontSize:'14px', color:colors.textMuted, fontWeight:500}}>Cliquer pour uploader une photo</div>
+                  <div style={{fontSize:'12px', color:colors.textSubtle}}>JPG, PNG, WEBP — max 10 Mo</div>
+                </label>
+              )}
+            </div>
+
+            {/* Ingrédients */}
+            <div style={{background:colors.surface, padding:'28px', borderRadius:'20px', boxShadow:DesignSystem.shadow.sm, marginBottom:'16px'}}>
+              <div style={{fontFamily:colors.displayFont, fontSize:'20px', fontWeight:600, color:colors.text, marginBottom:'20px'}}>Ingrédients</div>
+              <DynamicList list={ingredients} setList={setIngredients} placeholder="Ingrédient" numbered={false} />
+            </div>
+
+            {/* Étapes */}
+            <div style={{background:colors.surface, padding:'28px', borderRadius:'20px', boxShadow:DesignSystem.shadow.sm, marginBottom:'28px'}}>
+              <div style={{fontFamily:colors.displayFont, fontSize:'20px', fontWeight:600, color:colors.text, marginBottom:'20px'}}>Étapes de préparation</div>
+              <DynamicList list={steps} setList={setSteps} placeholder="Étape" numbered={true} />
+            </div>
+
+            <div style={{display:'flex', gap:'12px'}}>
+              <button type="submit" style={{flex:1, background:colors.accent, color:colors.accentText, border:'none', padding:'15px', borderRadius:DesignSystem.radius.pill, fontSize:'15px', fontWeight:600, cursor:'pointer', fontFamily:colors.bodyFont}}
+                onMouseEnter={e => e.currentTarget.style.background = colors.accentHover}
+                onMouseLeave={e => e.currentTarget.style.background = colors.accent}>
+              {isEditing ? 'Enregistrer les modifications' : 'Ajouter la recette'}
+              </button>
+              <button type="button" style={{background:'transparent', color:colors.textMuted, border:`1.5px solid ${colors.border}`, padding:'15px 24px', borderRadius:DesignSystem.radius.pill, fontSize:'15px', cursor:'pointer', fontFamily:colors.bodyFont}}
+                onClick={() => onNavigate('home')}>Annuler</button>
+            </div>
+          </form>
+        </div>
+      );
+    }
+    
+    function TweaksPanel({ tweaks, setTweaks, visible }) {
+      const colors = DesignSystem.getColors(tweaks);
+      if (!visible) return null;
+
+      const updateTweaks = (updates) => {
+        setTweaks(prev => ({...prev, ...updates}));
+        window.parent.postMessage({type: '__edit_mode_set_keys', edits: updates}, '*');
+      };
+
+      const panel = {
+        position:'fixed', bottom:'20px', right:'20px',
+        background:colors.bgElevated, border:`1.5px solid ${colors.border}`,
+        borderRadius:'20px', padding:'24px', boxShadow:DesignSystem.shadow.lg,
+        width:'280px', maxHeight:'80vh', overflow:'auto', zIndex:999,
+        fontFamily:colors.bodyFont,
+      };
+
+      const label = { display:'block', fontSize:'12px', fontWeight:600, color:colors.textMuted, marginBottom:'8px', letterSpacing:'0.5px', textTransform:'uppercase' };
+      const section = { marginBottom:'20px' };
+      const accentDots = {
+        soleil: '#d4a017',
+        terra:  '#c4622d',
+        sage:   '#4a7c59',
+        indigo: '#4a5c8a',
+      };
+
+      return (
+        <div style={panel}>
+          <div style={{fontFamily:colors.displayFont, fontSize:'20px', fontWeight:600, color:colors.text, marginBottom:'20px'}}>Tweaks</div>
+
+          <div style={section}>
+            <label style={label}>Couleur accent</label>
+            <div style={{display:'flex', gap:'10px'}}>
+              {Object.entries(accentDots).map(([key, hex]) => (
+                <div
+                  key={key}
+                  onClick={() => updateTweaks({accentColor: key})}
+                  style={{width:'30px', height:'30px', borderRadius:'50%', background:hex, cursor:'pointer', border: tweaks.accentColor===key ? `3px solid ${colors.text}` : '3px solid transparent', transition:'border-color 0.15s'}}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div style={section}>
+            <label style={label}>Densité de la grille ({tweaks.gridDensity} col.)</label>
+            <input type="range" min="2" max="4" value={tweaks.gridDensity} onChange={e => updateTweaks({gridDensity: parseInt(e.target.value)})} style={{width:'100%', accentColor: colors.accent}} />
+          </div>
+        </div>
+      );
+    }
+
+    // ========== LOGIN SCREEN ==========
+    function LoginScreen({ tweaks, onLogin }) {
+      const colors = DesignSystem.getColors(tweaks);
+      const [name, setName] = useState('');
+      const [password, setPassword] = useState('');
+      const [showPassword, setShowPassword] = useState(false);
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      // Demo: mot de passe "recettes"
+      const DEMO_PASSWORD = 'recettes';
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
+        if (!name.trim()) { setError('Entre ton prénom'); return; }
+        if (!password) { setError('Entre le mot de passe'); return; }
+        setLoading(true);
+        setTimeout(() => {
+          if (password === DEMO_PASSWORD) {
+            onLogin(name.trim());
+          } else {
+            setLoading(false);
+            setError('Mot de passe incorrect');
+            setPassword('');
+          }
+        }, 600);
+      };
+
+      const inputStyle = (hasError) => ({
+        width:'100%', padding:'13px 16px', fontSize:'15px',
+        border:`1.5px solid ${hasError ? '#e05c5c' : colors.border}`,
+        borderRadius:DesignSystem.radius.md, background:colors.bg,
+        color:colors.text, fontFamily:colors.bodyFont, outline:'none',
+        transition:'border-color 0.2s',
+      });
+
+      return (
+        <div style={{
+          minHeight:'100vh', background:colors.bg,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          padding:'24px', fontFamily:colors.bodyFont,
+          position:'relative', overflow:'hidden',
+        }}>
+          {/* Blobs décoratifs */}
+          <div style={{position:'fixed', top:'-100px', right:'-100px', width:'380px', height:'380px', background:colors.accentPale, borderRadius:'50%', zIndex:0}}/>
+          <div style={{position:'fixed', bottom:'-80px', left:'-80px', width:'280px', height:'280px', background:colors.accentPale, borderRadius:'50%', zIndex:0, opacity:0.6}}/>
+
+          <div style={{
+            background:colors.bgElevated, borderRadius:'24px',
+            padding:'48px 40px', width:'100%', maxWidth:'400px',
+            boxShadow:DesignSystem.shadow.lg, position:'relative', zIndex:1,
+          }}>
+            {/* Logo */}
+            <div style={{textAlign:'center', marginBottom:'40px'}}>
+              <div style={{display:'inline-flex', alignItems:'baseline', gap:'2px'}}>
+                <span style={{fontFamily:colors.displayFont, fontSize:'38px', fontWeight:600, color:colors.text}}>DnD</span>
+                <span style={{fontFamily:colors.displayFont, fontSize:'38px', fontWeight:300, fontStyle:'italic', color:colors.accent}}>Meal</span>
+              </div>
+              <div style={{fontSize:'14px', color:colors.textMuted, marginTop:'6px'}}>Le carnet de recettes partagé</div>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              {/* Prénom */}
+              <div style={{marginBottom:'16px'}}>
+                <label style={{display:'block', fontSize:'13px', fontWeight:600, color:colors.text, marginBottom:'7px'}}>Prénom</label>
+                <input
+                  type="text"
+                  style={inputStyle(false)}
+                  value={name}
+                  onChange={e => { setName(e.target.value); setError(''); }}
+                  placeholder="Marie, Thomas, Emma…"
+                  autoFocus
+                  onFocus={e => e.target.style.borderColor = colors.accent}
+                  onBlur={e => e.target.style.borderColor = colors.border}
+                />
+              </div>
+
+              {/* Mot de passe */}
+              <div style={{marginBottom:'8px'}}>
+                <label style={{display:'block', fontSize:'13px', fontWeight:600, color:colors.text, marginBottom:'7px'}}>Mot de passe</label>
+                <div style={{position:'relative'}}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    style={{...inputStyle(!!error), paddingRight:'46px'}}
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); setError(''); }}
+                    placeholder="••••••••"
+                    onFocus={e => e.target.style.borderColor = colors.accent}
+                    onBlur={e => e.target.style.borderColor = error ? '#e05c5c' : colors.border}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    style={{
+                      position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)',
+                      background:'none', border:'none', cursor:'pointer', color:colors.textSubtle,
+                      fontSize:'16px', padding:'4px', lineHeight:1,
+                    }}
+                  >
+                    {showPassword ? '🙈' : '👁'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Erreur */}
+              {error && (
+                <div style={{fontSize:'13px', color:'#e05c5c', marginBottom:'12px', display:'flex', alignItems:'center', gap:'6px'}}>
+                  <span>⚠</span> {error}
+                </div>
+              )}
+
+              {/* Indice mdp */}
+              {!error && (
+                <div style={{fontSize:'12px', color:colors.textSubtle, marginBottom:'20px'}}>
+                  Indice : le mot de passe est le thème du site 😉
+                </div>
+              )}
+              {error && <div style={{marginBottom:'12px'}}/>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width:'100%',
+                  background: loading ? colors.border : colors.accent,
+                  color: loading ? colors.textMuted : colors.accentText,
+                  border:'none', padding:'15px',
+                  borderRadius:DesignSystem.radius.pill,
+                  fontSize:'15px', fontWeight:600, cursor: loading ? 'not-allowed' : 'pointer',
+                  fontFamily:colors.bodyFont, transition:'background 0.2s',
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
+                }}
+                onMouseEnter={e => { if (!loading) e.currentTarget.style.background = colors.accentHover; }}
+                onMouseLeave={e => { if (!loading) e.currentTarget.style.background = colors.accent; }}
+              >
+                {loading ? (
+                  <>
+                    <span style={{display:'inline-block', width:'14px', height:'14px', border:`2px solid ${colors.textMuted}`, borderTopColor:'transparent', borderRadius:'50%', animation:'spin 0.7s linear infinite'}}/>
+                    Connexion…
+                  </>
+                ) : 'Se connecter →'}
+              </button>
+            </form>
+
+            <div style={{marginTop:'28px', paddingTop:'20px', borderTop:`1px solid ${colors.border}`, textAlign:'center'}}>
+              <div style={{fontSize:'12px', color:colors.textSubtle, lineHeight:1.6}}>
+                Site privé · réservé à la famille et aux amis 🍽️
+              </div>
+            </div>
+          </div>
+
+          <style>{`
+            @keyframes spin { to { transform: rotate(360deg); } }
+          `}</style>
+        </div>
+      );
+    }
+    
+    // ========== MAIN APP ==========
+    function App() {
+      const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+      const [recipes, setRecipes] = useState(MOCK_RECIPES);
+      const [nextMeal, setNextMeal] = useState(MOCK_RECIPES[0]);
+      const [selectedRecipe, setSelectedRecipe] = useState(null);
+      const [currentPage, setCurrentPage] = useState('home');
+      const [tweaksVisible, setTweaksVisible] = useState(false);
+      const [currentUser, setCurrentUser] = useState(null);
+      const [editRecipe, setEditRecipe] = useState(null);
+
+      const colors = DesignSystem.getColors(tweaks);
+
+      // Edit mode protocol
+      useEffect(() => {
+        const handleMessage = (e) => {
+          if (e.data.type === '__activate_edit_mode') setTweaksVisible(true);
+          else if (e.data.type === '__deactivate_edit_mode') setTweaksVisible(false);
+        };
+        window.addEventListener('message', handleMessage);
+        window.parent.postMessage({type: '__edit_mode_available'}, '*');
+        return () => window.removeEventListener('message', handleMessage);
+      }, []);
+
+      const handleToggleTheme = () => {
+        const newTheme = tweaks.theme === 'light' ? 'dark' : 'light';
+        setTweaks(prev => ({...prev, theme: newTheme}));
+        window.parent.postMessage({type: '__edit_mode_set_keys', edits: {theme: newTheme}}, '*');
+      };
+
+      const handleAddRecipe = (recipe) => {
+        if (editRecipe) {
+          setRecipes(prev => prev.map(r => r.id === recipe.id ? recipe : r));
+          setEditRecipe(null);
+        } else {
+          setRecipes([{...recipe, author: recipe.author || currentUser}, ...recipes]);
+        }
+      };
+
+      const handleSetNextMeal = (recipe) => {
+        setNextMeal(recipe);
+        setRecipes(prev => prev.map(r =>
+          r.id === recipe.id ? {...r, timesChosen: (r.timesChosen ?? 0) + 1} : r
+        ));
+      };
+
+      const handleRate = (recipeId, value) => {
+        setRecipes(prev => prev.map(r => {
+          if (r.id !== recipeId) return r;
+          const ratings = {...(r.ratings || {}), [value]: ((r.ratings || {})[value] || 0) + 1};
+          return {...r, ratings};
+        }));
+        setSelectedRecipe(prev => {
+          if (!prev || prev.id !== recipeId) return prev;
+          const ratings = {...(prev.ratings || {}), [value]: ((prev.ratings || {})[value] || 0) + 1};
+          return {...prev, ratings};
+        });
+      };
+
+      const appStyles = {
+        minHeight: '100vh',
+        background: colors.bg,
+        color: colors.text,
+        transition: 'background 0.3s, color 0.3s',
+      };
+
+      if (!currentUser) {
+        return <LoginScreen tweaks={tweaks} onLogin={setCurrentUser} />;
+      }
+
+      return (
+        <div style={appStyles}>
+          <Header
+            tweaks={tweaks}
+            onNavigate={setCurrentPage}
+            currentPage={currentPage}
+            onToggleTheme={handleToggleTheme}
+          />
+
+          {currentPage === 'home' && (
+            <HomePage
+              tweaks={tweaks}
+              recipes={recipes}
+              nextMeal={nextMeal}
+              onSelectNextMeal={handleSetNextMeal}
+              onViewRecipe={setSelectedRecipe}
+            />
+          )}
+
+          {currentPage === 'add-recipe' && (
+            <AddRecipePage
+              tweaks={tweaks}
+              onNavigate={(p) => { setCurrentPage(p); setEditRecipe(null); }}
+              onAddRecipe={handleAddRecipe}
+              currentUser={currentUser}
+              editRecipe={editRecipe}
+            />
+          )}
+
+          {selectedRecipe && (
+            <RecipeModal
+              recipe={selectedRecipe}
+              tweaks={tweaks}
+              onClose={() => setSelectedRecipe(null)}
+              onSetNextMeal={handleSetNextMeal}
+              isNextMeal={nextMeal?.id === selectedRecipe.id}
+              onRate={handleRate}
+              onEdit={(r) => { setEditRecipe(r); setCurrentPage('add-recipe'); }}
+            />
+          )}
+
+          <TweaksPanel
+            tweaks={tweaks}
+            setTweaks={setTweaks}
+            visible={tweaksVisible}
+          />
+        </div>
+      );
+    }
+    
+    // Render
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

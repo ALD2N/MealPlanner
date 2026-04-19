@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DnDMeal — Explorations de style</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'DM Sans', sans-serif; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+// ── Shared mock data ──────────────────────────────────────────
+const recipes = [
+  { id:1, title:"Risotto aux champignons", author:"Marie", likes:12, timesChosen:7, img:"https://picsum.photos/seed/risotto/400/300" },
+  { id:2, title:"Salade César", author:"Thomas", likes:5, timesChosen:3, img:"https://picsum.photos/seed/salad/400/300" },
+  { id:3, title:"Pâtes carbonara", author:"Sophie", likes:18, timesChosen:11, img:"https://picsum.photos/seed/pasta/400/300" },
+  { id:4, title:"Curry de légumes", author:"Lucas", likes:9, timesChosen:5, img:null },
+];
+const nextMeal = recipes[2];
+
+// ═══════════════════════════════════════════════════════════
+// OPTION A — Editorial Noir
+// Typographique, noir & blanc, accents rouge sang
+// Syne + Libre Baskerville
+// ═══════════════════════════════════════════════════════════
+function StyleA() {
+  const [hovered, setHovered] = React.useState(null);
+  return (
+    <div style={{width:680, background:'#f7f5f0', fontFamily:"'DM Sans', sans-serif", overflowY:'auto', maxHeight:720}}>
+      {/* Header */}
+      <div style={{background:'#0d0d0d', padding:'16px 28px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+        <span style={{fontFamily:"'Syne', sans-serif", fontSize:22, fontWeight:800, color:'#f7f5f0', letterSpacing:'-0.5px'}}>DnDMeal</span>
+        <button style={{background:'#c0392b', color:'#fff', border:'none', padding:'8px 18px', fontSize:13, fontWeight:600, letterSpacing:'0.5px', cursor:'pointer'}}>+ Recette</button>
+      </div>
+
+      {/* Next meal */}
+      <div style={{background:'#0d0d0d', padding:'28px', borderTop:'1px solid #2a2a2a', position:'relative', overflow:'hidden'}}>
+        <div style={{fontSize:10, fontWeight:700, letterSpacing:'3px', color:'#c0392b', textTransform:'uppercase', marginBottom:10}}>Prochain repas</div>
+        <div style={{fontFamily:"'Syne', sans-serif", fontSize:38, fontWeight:800, color:'#f7f5f0', lineHeight:1.1, marginBottom:8}}>{nextMeal.title}</div>
+        <div style={{fontSize:13, color:'#888', marginBottom:20}}>Par {nextMeal.author} · {nextMeal.likes} likes · choisi {nextMeal.timesChosen}×</div>
+        <div style={{display:'flex', gap:10}}>
+          <button style={{background:'#c0392b', color:'#fff', border:'none', padding:'10px 22px', fontSize:13, fontWeight:600, cursor:'pointer'}}>Voir la recette →</button>
+          <button style={{background:'transparent', color:'#888', border:'1px solid #333', padding:'10px 22px', fontSize:13, cursor:'pointer'}}>Changer</button>
+        </div>
+        <div style={{position:'absolute', right:28, top:'50%', transform:'translateY(-50%)', fontSize:80, fontFamily:"'Syne', sans-serif", fontWeight:800, color:'#1a1a1a', lineHeight:1}}>№</div>
+      </div>
+
+      {/* Filters */}
+      <div style={{padding:'16px 28px', borderBottom:'1px solid #ddd', display:'flex', gap:8, alignItems:'center'}}>
+        <span style={{fontSize:11, fontWeight:600, color:'#888', letterSpacing:'1px', textTransform:'uppercase', marginRight:4}}>Filtres</span>
+        {['🌿 Végé','🎒 Transport','⚡ Rapide'].map(f => (
+          <span key={f} style={{padding:'5px 12px', border:'1px solid #0d0d0d', fontSize:12, fontWeight:600, cursor:'pointer', letterSpacing:'0.3px'}}>{f}</span>
+        ))}
+        <span style={{marginLeft:'auto', fontSize:11, color:'#888', letterSpacing:'0.5px'}}>TRIER ↓</span>
+      </div>
+
+      {/* Grid */}
+      <div style={{padding:'28px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:2}}>
+        {recipes.map((r,i) => (
+          <div key={r.id}
+            onMouseEnter={() => setHovered(r.id)}
+            onMouseLeave={() => setHovered(null)}
+            style={{background: hovered===r.id ? '#0d0d0d' : '#fff', cursor:'pointer', transition:'background 0.15s', position:'relative', overflow:'hidden'}}>
+            <div style={{height:160, background:'#e8e4dc', overflow:'hidden', position:'relative'}}>
+              {r.img && <img src={r.img} alt="" style={{width:'100%', height:'100%', objectFit:'cover', filter:'grayscale(30%)', transform: hovered===r.id ? 'scale(1.05)' : 'scale(1)', transition:'transform 0.3s'}} />}
+              {!r.img && <div style={{display:'flex', alignItems:'center', justifyContent:'center', height:'100%', fontSize:11, fontFamily:'monospace', color:'#aaa'}}>[ photo recette ]</div>}
+              <div style={{position:'absolute', bottom:8, left:8, background:'#c0392b', color:'#fff', padding:'3px 8px', fontSize:10, fontWeight:700, letterSpacing:'0.5px'}}>{r.timesChosen}× choisi</div>
+            </div>
+            <div style={{padding:'14px 16px', borderBottom:'1px solid #eee'}}>
+              <div style={{fontFamily:"'Syne', sans-serif", fontSize:15, fontWeight:700, color: hovered===r.id ? '#f7f5f0' : '#0d0d0d', marginBottom:4, transition:'color 0.15s'}}>{r.title}</div>
+              <div style={{fontSize:12, color: hovered===r.id ? '#888' : '#777', display:'flex', justifyContent:'space-between', transition:'color 0.15s'}}>
+                <span>Par {r.author}</span>
+                <span>♥ {r.likes}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// OPTION B — Organique & Chaleureux
+// Terracotta, crème profond, formes rondes, ambiance maison
+// Fraunces + DM Sans
+// ═══════════════════════════════════════════════════════════
+function StyleB() {
+  const [hovered, setHovered] = React.useState(null);
+  const bg = '#faf6f0';
+  const card = '#fff8f0';
+  const terra = '#c4622d';
+  const dark = '#2d1f15';
+  const muted = '#9a7c6b';
+  return (
+    <div style={{width:680, background:bg, fontFamily:"'DM Sans', sans-serif", overflowY:'auto', maxHeight:720}}>
+      {/* Header */}
+      <div style={{padding:'18px 28px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:`1.5px solid #e8ddd4`}}>
+        <div>
+          <span style={{fontFamily:"'Fraunces', serif", fontSize:24, fontWeight:600, color:dark}}>DnD</span>
+          <span style={{fontFamily:"'Fraunces', serif", fontSize:24, fontWeight:300, color:terra}}>Meal</span>
+        </div>
+        <button style={{background:terra, color:'#fff', border:'none', padding:'10px 22px', borderRadius:100, fontSize:13, fontWeight:500, cursor:'pointer'}}>+ Ajouter</button>
+      </div>
+
+      {/* Next meal */}
+      <div style={{margin:'20px 24px', background:terra, borderRadius:20, padding:'28px', position:'relative', overflow:'hidden'}}>
+        <div style={{position:'absolute', top:-30, right:-30, width:160, height:160, background:'rgba(255,255,255,0.08)', borderRadius:'50%'}}/>
+        <div style={{position:'absolute', bottom:-40, right:40, width:100, height:100, background:'rgba(255,255,255,0.05)', borderRadius:'50%'}}/>
+        <div style={{fontSize:11, fontWeight:600, letterSpacing:'2px', color:'rgba(255,255,255,0.7)', textTransform:'uppercase', marginBottom:8}}>Ce soir on mange</div>
+        <div style={{fontFamily:"'Fraunces', serif", fontSize:34, fontWeight:600, color:'#fff', lineHeight:1.15, marginBottom:6}}>{nextMeal.title}</div>
+        <div style={{fontSize:13, color:'rgba(255,255,255,0.75)', marginBottom:20}}>par {nextMeal.author} · ♥ {nextMeal.likes}</div>
+        <button style={{background:'#fff', color:terra, border:'none', padding:'10px 24px', borderRadius:100, fontSize:13, fontWeight:600, cursor:'pointer'}}>Voir la recette</button>
+      </div>
+
+      {/* Filters */}
+      <div style={{padding:'0 24px 16px', display:'flex', gap:8, flexWrap:'wrap'}}>
+        {['🌿 Végétarien','🎒 Transport facile','⚡ Rapide'].map(f => (
+          <span key={f} style={{padding:'7px 16px', border:`1.5px solid #e0cfc4`, background:card, color:muted, fontSize:13, borderRadius:100, cursor:'pointer'}}>{f}</span>
+        ))}
+      </div>
+
+      {/* Section title */}
+      <div style={{padding:'8px 24px 16px', display:'flex', justifyContent:'space-between', alignItems:'baseline'}}>
+        <span style={{fontFamily:"'Fraunces', serif", fontSize:22, fontWeight:600, color:dark}}>Nos recettes</span>
+        <span style={{fontSize:13, color:muted}}>Trier : Plus aimé ↓</span>
+      </div>
+
+      {/* Grid */}
+      <div style={{padding:'0 24px 28px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:16}}>
+        {recipes.map(r => (
+          <div key={r.id}
+            onMouseEnter={() => setHovered(r.id)}
+            onMouseLeave={() => setHovered(null)}
+            style={{background:card, borderRadius:16, overflow:'hidden', cursor:'pointer', boxShadow: hovered===r.id ? '0 8px 24px rgba(44,31,21,0.15)' : '0 2px 8px rgba(44,31,21,0.07)', transform: hovered===r.id ? 'translateY(-3px)' : 'none', transition:'all 0.25s'}}>
+            <div style={{height:150, background:'#f0e6da', overflow:'hidden', position:'relative'}}>
+              {r.img ? <img src={r.img} alt="" style={{width:'100%', height:'100%', objectFit:'cover', transform: hovered===r.id ? 'scale(1.05)' : 'scale(1)', transition:'transform 0.3s'}} />
+              : <div style={{display:'flex', alignItems:'center', justifyContent:'center', height:'100%', fontSize:11, fontFamily:'monospace', color:'#c4a898'}}>[ photo ]</div>}
+            </div>
+            <div style={{padding:'14px 16px'}}>
+              <div style={{fontFamily:"'Fraunces', serif", fontSize:16, fontWeight:600, color:dark, marginBottom:4}}>{r.title}</div>
+              <div style={{fontSize:12, color:muted, display:'flex', justifyContent:'space-between'}}>
+                <span>Par {r.author}</span>
+                <span style={{display:'flex', gap:8}}>
+                  <span>♥ {r.likes}</span>
+                  <span>◎ {r.timesChosen}×</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// OPTION C — Gastronomique Sombre
+// Charbon profond, or pâle, lignes fines, ambiance restaurant
+// Space Grotesk + Playfair Display
+// ═══════════════════════════════════════════════════════════
+function StyleC() {
+  const [hovered, setHovered] = React.useState(null);
+  const bg = '#121110';
+  const surface = '#1c1b19';
+  const border = '#2e2c28';
+  const gold = '#c9a96e';
+  const text = '#e8e2d9';
+  const muted = '#7a7570';
+  return (
+    <div style={{width:680, background:bg, fontFamily:"'Space Grotesk', sans-serif", overflowY:'auto', maxHeight:720}}>
+      {/* Header */}
+      <div style={{padding:'18px 32px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:`1px solid ${border}`}}>
+        <div style={{display:'flex', alignItems:'center', gap:10}}>
+          <div style={{width:28, height:28, border:`1px solid ${gold}`, transform:'rotate(45deg)'}}/>
+          <span style={{fontFamily:"'Playfair Display', serif", fontSize:20, fontWeight:700, color:text, letterSpacing:'0.5px'}}>DnDMeal</span>
+        </div>
+        <button style={{background:'transparent', color:gold, border:`1px solid ${gold}`, padding:'9px 22px', fontSize:13, fontWeight:500, cursor:'pointer', letterSpacing:'0.5px'}}>+ Recette</button>
+      </div>
+
+      {/* Next meal */}
+      <div style={{padding:'32px', borderBottom:`1px solid ${border}`, display:'flex', gap:28, alignItems:'center'}}>
+        <div style={{flex:1}}>
+          <div style={{fontSize:10, fontWeight:600, letterSpacing:'3px', color:gold, textTransform:'uppercase', marginBottom:12}}>Prochain repas</div>
+          <div style={{fontFamily:"'Playfair Display', serif", fontSize:36, fontWeight:700, color:text, lineHeight:1.15, marginBottom:8}}>{nextMeal.title}</div>
+          <div style={{fontSize:13, color:muted, marginBottom:24}}>Par {nextMeal.author} · {nextMeal.likes} appréciations</div>
+          <div style={{display:'flex', gap:12}}>
+            <button style={{background:gold, color:bg, border:'none', padding:'11px 24px', fontSize:13, fontWeight:600, cursor:'pointer'}}>Voir la recette</button>
+            <button style={{background:'transparent', color:muted, border:`1px solid ${border}`, padding:'11px 24px', fontSize:13, cursor:'pointer'}}>Changer</button>
+          </div>
+        </div>
+        {nextMeal.img && (
+          <div style={{width:180, height:180, flexShrink:0, overflow:'hidden'}}>
+            <img src={nextMeal.img} alt="" style={{width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.7) contrast(1.1)'}} />
+          </div>
+        )}
+      </div>
+
+      {/* Filters + Sort */}
+      <div style={{padding:'16px 32px', borderBottom:`1px solid ${border}`, display:'flex', gap:8, alignItems:'center'}}>
+        {['🌿 Végétarien','🎒 Transport','⚡ Rapide'].map(f => (
+          <span key={f} style={{padding:'6px 14px', border:`1px solid ${border}`, color:muted, fontSize:12, cursor:'pointer', letterSpacing:'0.3px'}}>{f}</span>
+        ))}
+        <span style={{marginLeft:'auto', color:gold, fontSize:12, letterSpacing:'0.5px', cursor:'pointer'}}>Plus aimé ↓</span>
+      </div>
+
+      {/* Grid */}
+      <div style={{padding:'28px 32px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:16}}>
+        {recipes.map(r => (
+          <div key={r.id}
+            onMouseEnter={() => setHovered(r.id)}
+            onMouseLeave={() => setHovered(null)}
+            style={{background:surface, border:`1px solid ${hovered===r.id ? gold : border}`, cursor:'pointer', transition:'border-color 0.2s', overflow:'hidden'}}>
+            <div style={{height:150, overflow:'hidden', background:'#2a2825', position:'relative'}}>
+              {r.img ? <img src={r.img} alt="" style={{width:'100%', height:'100%', objectFit:'cover', filter:'brightness(0.75)', transform: hovered===r.id ? 'scale(1.05)' : 'scale(1)', transition:'transform 0.3s'}} />
+              : <div style={{display:'flex', alignItems:'center', justifyContent:'center', height:'100%', fontSize:11, fontFamily:'monospace', color:'#555'}}>[ photo ]</div>}
+              <div style={{position:'absolute', bottom:8, left:8, background:gold, color:bg, padding:'3px 8px', fontSize:10, fontWeight:600}}>{r.timesChosen}×</div>
+            </div>
+            <div style={{padding:'14px 16px'}}>
+              <div style={{fontFamily:"'Playfair Display', serif", fontSize:15, fontWeight:700, color:text, marginBottom:6}}>{r.title}</div>
+              <div style={{fontSize:12, color:muted, display:'flex', justifyContent:'space-between'}}>
+                <span>{r.author}</span>
+                <span style={{color:gold}}>♥ {r.likes}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// OPTION D — Vivant & Moderne
+// Blanc pur, vert sauge, typographie assertive, app-like
+// Syne + DM Sans
+// ═══════════════════════════════════════════════════════════
+function StyleD() {
+  const [hovered, setHovered] = React.useState(null);
+  const bg = '#ffffff';
+  const surface = '#f5f7f4';
+  const sage = '#4a7c59';
+  const sagePale = '#e8f0e9';
+  const dark = '#111c15';
+  const muted = '#7a8a7d';
+  const border = '#e4ebe5';
+  return (
+    <div style={{width:680, background:bg, fontFamily:"'DM Sans', sans-serif", overflowY:'auto', maxHeight:720}}>
+      {/* Header */}
+      <div style={{padding:'16px 28px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:`1px solid ${border}`}}>
+        <div style={{display:'flex', alignItems:'center', gap:8}}>
+          <div style={{width:32, height:32, background:sage, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16}}>🥘</div>
+          <span style={{fontFamily:"'Syne', sans-serif", fontSize:20, fontWeight:700, color:dark}}>DnDMeal</span>
+        </div>
+        <button style={{background:sage, color:'#fff', border:'none', padding:'10px 22px', borderRadius:10, fontSize:13, fontWeight:600, cursor:'pointer'}}>+ Ajouter</button>
+      </div>
+
+      {/* Next meal — card style */}
+      <div style={{margin:'20px 24px', background:sagePale, borderRadius:16, padding:'0', overflow:'hidden', display:'flex'}}>
+        <div style={{flex:1, padding:'28px'}}>
+          <div style={{fontSize:11, fontWeight:700, letterSpacing:'2px', color:sage, textTransform:'uppercase', marginBottom:8}}>Ce soir</div>
+          <div style={{fontFamily:"'Syne', sans-serif", fontSize:28, fontWeight:700, color:dark, lineHeight:1.2, marginBottom:6}}>{nextMeal.title}</div>
+          <div style={{fontSize:13, color:muted, marginBottom:20}}>par {nextMeal.author}</div>
+          <div style={{display:'flex', gap:10}}>
+            <button style={{background:sage, color:'#fff', border:'none', padding:'9px 20px', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer'}}>Voir →</button>
+            <button style={{background:'transparent', color:sage, border:`1.5px solid ${sage}`, padding:'9px 20px', borderRadius:8, fontSize:13, fontWeight:500, cursor:'pointer'}}>Changer</button>
+          </div>
+        </div>
+        {nextMeal.img && (
+          <div style={{width:200, flexShrink:0, overflow:'hidden'}}>
+            <img src={nextMeal.img} alt="" style={{width:'100%', height:'100%', objectFit:'cover'}} />
+          </div>
+        )}
+      </div>
+
+      {/* Filters */}
+      <div style={{padding:'0 24px 12px', display:'flex', gap:8, flexWrap:'wrap', alignItems:'center'}}>
+        {['🌿 Végé','🎒 Transport','⚡ Rapide'].map((f,i) => (
+          <span key={f} style={{padding:'7px 16px', background: i===0 ? sage : surface, color: i===0 ? '#fff' : muted, fontSize:13, borderRadius:8, cursor:'pointer', border:`1px solid ${i===0 ? sage : border}`}}>{f}</span>
+        ))}
+        <span style={{marginLeft:'auto', fontSize:13, color:muted, cursor:'pointer', padding:'7px 14px', border:`1px solid ${border}`, borderRadius:8}}>Trier ⌄</span>
+      </div>
+
+      {/* Grid */}
+      <div style={{padding:'12px 24px 28px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:12}}>
+        {recipes.map(r => (
+          <div key={r.id}
+            onMouseEnter={() => setHovered(r.id)}
+            onMouseLeave={() => setHovered(null)}
+            style={{background:surface, borderRadius:12, overflow:'hidden', cursor:'pointer', boxShadow: hovered===r.id ? '0 6px 20px rgba(0,0,0,0.1)' : 'none', transform: hovered===r.id ? 'translateY(-2px)' : 'none', transition:'all 0.2s', border:`1px solid ${border}`}}>
+            <div style={{height:140, overflow:'hidden', background:'#e4ebe5', position:'relative'}}>
+              {r.img ? <img src={r.img} alt="" style={{width:'100%', height:'100%', objectFit:'cover', transform: hovered===r.id ? 'scale(1.05)' : 'scale(1)', transition:'transform 0.3s'}} />
+              : <div style={{display:'flex', alignItems:'center', justifyContent:'center', height:'100%', fontSize:11, fontFamily:'monospace', color:muted}}>[ photo ]</div>}
+              <div style={{position:'absolute', top:8, right:8, background:'rgba(255,255,255,0.9)', color:sage, padding:'3px 8px', borderRadius:6, fontSize:11, fontWeight:600}}>◎ {r.timesChosen}×</div>
+            </div>
+            <div style={{padding:'12px 14px'}}>
+              <div style={{fontFamily:"'Syne', sans-serif", fontSize:15, fontWeight:700, color:dark, marginBottom:4}}>{r.title}</div>
+              <div style={{fontSize:12, color:muted, display:'flex', justifyContent:'space-between'}}>
+                <span>{r.author}</span>
+                <span style={{color:sage}}>♥ {r.likes}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════════════════
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection
+        title="Explorations de style — DnDMeal"
+        subtitle="4 directions visuelles · Cliquez sur une et dites-moi laquelle vous inspire"
+      >
+        <DCArtboard label="A — Éditorial Noir  ·  Syne + DM Sans" width={680} height={720}>
+          <StyleA />
+        </DCArtboard>
+        <DCArtboard label="B — Organique & Chaleureux  ·  Fraunces + DM Sans" width={680} height={720}>
+          <StyleB />
+        </DCArtboard>
+        <DCArtboard label="C — Gastronomique Sombre  ·  Playfair + Space Grotesk" width={680} height={720}>
+          <StyleC />
+        </DCArtboard>
+        <DCArtboard label="D — Vivant & Moderne  ·  Syne + DM Sans" width={680} height={720}>
+          <StyleD />
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

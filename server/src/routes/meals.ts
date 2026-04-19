@@ -3,6 +3,8 @@ import { MealService } from '../services/MealService';
 import { DiscordService } from '../services/DiscordService';
 import { AppError } from '../middleware/errorHandler';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { io } from '../index';
+import { broadcastMealSelected } from '../websocket/handlers';
 
 const router = Router();
 
@@ -45,7 +47,7 @@ router.post('/select', authMiddleware, async (req: AuthRequest, res: Response, n
       meal.recipe
     );
 
-    // TODO: broadcastMealSelected(io, { recipe: meal.recipe, selectedBy: meal.selectedBy, date: meal.date });
+    broadcastMealSelected(io, { recipe: meal.recipe, selectedBy: meal.selectedBy, date: meal.date });
 
     res.status(201).json({ meal });
   } catch (error) {

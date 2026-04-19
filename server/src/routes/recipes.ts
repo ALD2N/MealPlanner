@@ -2,6 +2,8 @@ import { Router, Response, NextFunction } from 'express';
 import { RecipeService } from '../services/RecipeService';
 import { AppError } from '../middleware/errorHandler';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { io } from '../index';
+import { broadcastRecipeAdded, broadcastRecipeUpdated, broadcastRecipeDeleted, broadcastRatingAdded } from '../websocket/handlers';
 
 const router = Router();
 
@@ -42,7 +44,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response, next: N
       req.userId as string
     );
 
-    // TODO: broadcastRecipeAdded(io, { recipe });
+    broadcastRecipeAdded(io, { recipe });
 
     res.status(201).json({ recipe });
   } catch (error) {
@@ -85,7 +87,7 @@ router.patch('/:id', authMiddleware, async (req: AuthRequest, res: Response, nex
       req.userId as string
     );
 
-    // TODO: broadcastRecipeUpdated(io, { recipe });
+    broadcastRecipeUpdated(io, { recipe });
 
     res.status(200).json({ recipe });
   } catch (error) {
@@ -102,7 +104,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response, ne
     const { id } = req.params;
     await RecipeService.deleteRecipe(id, req.userId as string);
 
-    // TODO: broadcastRecipeDeleted(io, { recipeId: id });
+    broadcastRecipeDeleted(io, { recipeId: id });
 
     res.status(204).send();
   } catch (error) {
@@ -130,7 +132,7 @@ router.patch('/:id/rating', authMiddleware, async (req: AuthRequest, res: Respon
 
     const recipe = await RecipeService.addRating(id, req.userId as string, rating);
 
-    // TODO: broadcastRatingAdded(io, { recipeId: id, userId: req.userId, rating });
+    broadcastRatingAdded(io, { recipeId: id, userId: req.userId as string, rating });
 
     res.status(200).json({ recipe });
   } catch (error) {
