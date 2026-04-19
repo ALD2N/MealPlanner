@@ -106,24 +106,24 @@ describe('AuthService', () => {
       expect(decoded?.userId).toBe(userId);
     });
 
-    it('throws error for invalid token format', () => {
-      expect(() => AuthService.verifyToken('invalid.token')).toThrow();
+    it('returns null for invalid token format', () => {
+      expect(AuthService.verifyToken('invalid.token')).toBeNull();
     });
 
-    it('throws error for malformed token', () => {
-      expect(() => AuthService.verifyToken('not-a-token')).toThrow();
+    it('returns null for malformed token', () => {
+      expect(AuthService.verifyToken('not-a-token')).toBeNull();
     });
 
-    it('throws error for empty token', () => {
-      expect(() => AuthService.verifyToken('')).toThrow();
+    it('returns null for empty token', () => {
+      expect(AuthService.verifyToken('')).toBeNull();
     });
 
-    it('throws error for tampered token', () => {
+    it('returns null for tampered token', () => {
       const userId = 'user123';
       const token = AuthService.generateToken(userId);
       const tampered = token.split('.').slice(0, 2).join('.') + '.invalid';
 
-      expect(() => AuthService.verifyToken(tampered)).toThrow();
+      expect(AuthService.verifyToken(tampered)).toBeNull();
     });
   });
 
