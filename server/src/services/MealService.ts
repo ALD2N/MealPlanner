@@ -32,8 +32,10 @@ export class MealService {
     await recipe.save();
 
     // Populate and return
-    mealSelection = await (mealSelection as any).populate('recipe').populate('selectedBy');
-    return this.toResponse(mealSelection as any);
+    const populated = await MealSelection.findById(mealSelection._id)
+      .populate('recipe')
+      .populate('selectedBy');
+    return this.toResponse(populated as any);
   }
 
   static async getCurrentMeal(): Promise<IMealSelectionResponse | null> {
@@ -113,6 +115,7 @@ export class MealService {
       _id: meal._id.toString(),
       recipe: recipeResponse,
       selectedBy: selectedByResponse,
+      status: meal.status,
       date: meal.date,
       createdAt: meal.createdAt,
     };

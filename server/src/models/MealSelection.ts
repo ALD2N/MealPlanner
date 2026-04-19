@@ -15,15 +15,21 @@ const mealSelectionSchema = new Schema<IMealSelectionDocument>(
       ref: 'User',
       required: true,
     },
+    status: {
+      type: String,
+      enum: ['pending', 'confirmed'],
+      default: 'pending',
+      required: true,
+    },
     date: {
       type: Date,
-      required: true,
+      default: null,
     },
   },
   { timestamps: true }
 );
 
-// Index to find current meal quickly
+mealSelectionSchema.index({ status: 1 });
 mealSelectionSchema.index({ date: -1 });
 
 export const MealSelection = mongoose.model<IMealSelectionDocument>(
