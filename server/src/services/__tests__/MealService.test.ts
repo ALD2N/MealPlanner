@@ -132,6 +132,7 @@ describe('MealService', () => {
 
       await MealService.deselectMeal();
 
+      expect(MealSelection.findOne).toHaveBeenCalledWith({ status: 'pending' });
       expect(MealSelection.deleteOne).toHaveBeenCalledWith({ _id: mockPendingDoc._id });
     });
   });
@@ -211,6 +212,20 @@ describe('MealService', () => {
       await MealService.getMealHistory();
 
       expect(MealSelection.find).toHaveBeenCalledWith({ status: 'confirmed' });
+    });
+
+    it('sorts by date descending', async () => {
+      const sortSpy = jest.fn().mockReturnThis();
+      const populateSpy = jest.fn();
+      populateSpy.mockReturnValueOnce({ populate: jest.fn().mockResolvedValueOnce([]) });
+      (MealSelection.find as any) = jest.fn().mockReturnValue({
+        sort: sortSpy,
+        populate: populateSpy,
+      });
+
+      await MealService.getMealHistory();
+
+      expect(sortSpy).toHaveBeenCalledWith({ date: -1 });
     });
 
     it('returns empty array when no confirmed meals', async () => {
