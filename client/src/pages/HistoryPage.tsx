@@ -149,18 +149,6 @@ export default function HistoryPage() {
                     {/* Buttons */}
                     <div className="flex gap-3 flex-wrap">
                       <button
-                        onClick={() => handleSelectMeal(item.recipe._id)}
-                        disabled={isLoadingMeal === item.recipe._id || !!currentMeal}
-                        className={`px-4 py-2 rounded-lg font-medium transition ${
-                          isLoadingMeal === item.recipe._id || !!currentMeal
-                            ? 'bg-amber-600 text-white opacity-50 cursor-not-allowed'
-                            : 'bg-amber-600 text-white hover:bg-amber-700'
-                        }`}
-                      >
-                        {isLoadingMeal === item.recipe._id ? 'Sélection...' : 'Changer'}
-                      </button>
-
-                      <button
                         onClick={() => setSelectedRecipe(item.recipe)}
                         disabled={isLoadingMeal !== null}
                         className={`px-4 py-2 rounded-lg font-medium transition ${
