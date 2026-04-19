@@ -15,7 +15,7 @@ router.post(
   adminMiddleware,
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const link = await InviteService.generateInviteLink(req.userId);
+      const link = await InviteService.generateInviteLink(req.userId!);
       res.status(201).json({ link });
     } catch (error) {
       next(error);
@@ -33,7 +33,7 @@ router.get(
   adminMiddleware,
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const links = await InviteService.listInviteLinks(req.userId);
+      const links = await InviteService.listInviteLinks(req.userId!);
       res.status(200).json({ links });
     } catch (error) {
       next(error);

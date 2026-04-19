@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IMealSelection } from '@dndmeal/shared';
 
-export interface IMealSelectionDocument extends IMealSelection, Document {}
+export interface IMealSelectionDocument extends Omit<IMealSelection, '_id'>, Document {}
 
 const mealSelectionSchema = new Schema<IMealSelectionDocument>(
   {

@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IRecipe, IRecipeRating } from '@dndmeal/shared';
 
-export interface IRecipeDocument extends IRecipe, Document {}
+export interface IRecipeDocument extends Omit<IRecipe, '_id'>, Document {}
 
 const ratingSchema = new Schema<IRecipeRating>(
   {

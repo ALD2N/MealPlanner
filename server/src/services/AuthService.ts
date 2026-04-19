@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config';
 import { User } from '../models/User';
 import { IUserResponse } from '@dndmeal/shared';
@@ -15,8 +15,8 @@ export class AuthService {
 
   static generateToken(userId: string): string {
     return jwt.sign({ userId }, config.JWT_SECRET, {
-      expiresIn: config.JWT_EXPIRE,
-    });
+      expiresIn: config.JWT_EXPIRE as string | number,
+    } as SignOptions);
   }
 
   static verifyToken(token: string): { userId: string } | null {

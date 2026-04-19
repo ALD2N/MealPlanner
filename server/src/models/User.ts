@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IUser } from '@dndmeal/shared';
 
-export interface IUserDocument extends IUser, Document {}
+export interface IUserDocument extends Omit<IUser, '_id'>, Document {}
 
 const userSchema = new Schema<IUserDocument>(
   {

@@ -101,7 +101,7 @@ export class RecipeService {
 
     // Add new rating
     recipe.ratings.push({
-      userId: new Types.ObjectId(userId),
+      userId: new Types.ObjectId(userId) as any,
       rating,
     });
 

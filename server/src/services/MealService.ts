@@ -21,7 +21,7 @@ export class MealService {
     normalizedDate.setHours(0, 0, 0, 0);
 
     // Create meal selection
-    const mealSelection = await MealSelection.create({
+    let mealSelection = await MealSelection.create({
       recipe: new Types.ObjectId(recipeId),
       selectedBy: new Types.ObjectId(userId),
       date: normalizedDate,
@@ -32,8 +32,8 @@ export class MealService {
     await recipe.save();
 
     // Populate and return
-    const populated = await mealSelection.populate('recipe').populate('selectedBy');
-    return this.toResponse(populated);
+    mealSelection = await (mealSelection as any).populate('recipe').populate('selectedBy');
+    return this.toResponse(mealSelection as any);
   }
 
   static async getCurrentMeal(): Promise<IMealSelectionResponse | null> {

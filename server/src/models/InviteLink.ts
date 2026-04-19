@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { IInviteLink } from '@dndmeal/shared';
 import crypto from 'crypto';
 
-export interface IInviteLinkDocument extends IInviteLink, Document {}
+export interface IInviteLinkDocument extends Omit<IInviteLink, '_id'>, Document {}
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString('hex');
