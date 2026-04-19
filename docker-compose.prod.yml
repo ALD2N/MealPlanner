@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: dndmeal-mongo-prod
+    environment:
+      MONGO_INITDB_DATABASE: dndmeal
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
+    networks:
+      - dndmeal
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+      target: prod
+    container_name: dndmeal-server-prod
+    ports:
+      - "5000:5000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+    depends_on:
+      - mongo
+    restart: always
+    networks:
+      - dndmeal
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+      target: prod
+    container_name: dndmeal-client-prod
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    restart: always
+    networks:
+      - dndmeal
+
+volumes:
+  mongodb_data:
+
+networks:
+  dndmeal:
+    driver: bridge

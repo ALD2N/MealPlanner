@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: dndmeal-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: dndmeal
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+      target: dev
+    container_name: dndmeal-server
+    ports:
+      - "5000:5000"
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/dndmeal
+      NODE_ENV: development
+      JWT_SECRET: dev-secret-key
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./server/src:/app/server/src
+      - ./shared/src:/app/shared/src
+    networks:
+      - dndmeal
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+      target: dev
+    container_name: dndmeal-client
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:5000
+      VITE_WS_URL: ws://localhost:5000
+    depends_on:
+      - server
+    volumes:
+      - ./client/src:/app/client/src
+      - ./client/index.html:/app/client/index.html
+    networks:
+      - dndmeal
+
+volumes:
+  mongodb_data:
+
+networks:
+  dndmeal:
+    driver: bridge
