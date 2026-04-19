@@ -1,6 +1,8 @@
 import express from 'express';
 import { config } from './config';
 import { connectDB } from './db';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import authRoutes from './routes/auth';
 
 const app = express();
 
@@ -9,6 +11,13 @@ app.use(express.json());
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
+
+// Routes
+app.use('/auth', authRoutes);
+
+// Error handling middleware (must be last)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 async function start() {
   await connectDB();
