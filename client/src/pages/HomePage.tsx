@@ -107,13 +107,13 @@ export default function HomePage() {
     on('rating:added', handleRatingAdded);
 
     return () => {
-      off('meal:selected');
-      off('meal:deselected');
-      off('meal:confirmed');
-      off('recipe:added');
-      off('recipe:updated');
-      off('recipe:deleted');
-      off('rating:added');
+      off('meal:selected', handleMealSelected);
+      off('meal:deselected', handleMealDeselected);
+      off('meal:confirmed', handleMealConfirmed);
+      off('recipe:added', handleRecipeAdded);
+      off('recipe:updated', handleRecipeUpdated);
+      off('recipe:deleted', handleRecipeDeleted);
+      off('rating:added', handleRatingAdded);
     };
   }, [on, off, getCurrentMeal]);
 

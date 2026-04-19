@@ -29,6 +29,9 @@ export class MealService {
     const populated = await MealSelection.findById(mealSelection._id)
       .populate('recipe')
       .populate('selectedBy');
+    if (!populated) {
+      throw new AppError('NOT_FOUND', 500, 'Meal selection not found after save');
+    }
     return this.toResponse(populated as any);
   }
 
@@ -59,6 +62,9 @@ export class MealService {
     const populated = await MealSelection.findById(pending._id)
       .populate('recipe')
       .populate('selectedBy');
+    if (!populated) {
+      throw new AppError('NOT_FOUND', 500, 'Meal selection not found after confirm');
+    }
     return this.toResponse(populated as any);
   }
 
