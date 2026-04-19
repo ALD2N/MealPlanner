@@ -28,16 +28,16 @@ export default function HistoryPage() {
     setLocalHistory([...history].sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()));
   }, [history]);
 
-  // WebSocket listener for new meal selections
+  // WebSocket listener for new meal confirmations
   useEffect(() => {
-    const handleMealSelected = () => {
+    const handleMealConfirmed = () => {
       getHistory();
     };
 
-    on('meal:selected', handleMealSelected);
+    on('meal:confirmed', handleMealConfirmed);
 
     return () => {
-      off('meal:selected', handleMealSelected);
+      off('meal:confirmed', handleMealConfirmed);
     };
   }, [on, off, getHistory]);
 

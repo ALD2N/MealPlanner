@@ -28,7 +28,7 @@ const SORT_OPTIONS: Array<{ id: string; label: string; field: string | null; dir
 export default function HomePage() {
   const navigate = useNavigate();
   const { recipes, addRating } = useRecipes();
-  const { currentMeal, selectMeal, deselectMeal, confirmMeal } = useMealSelection();
+  const { currentMeal, selectMeal, deselectMeal, confirmMeal, getCurrentMeal } = useMealSelection();
   const { on, off } = useWebSocket();
   const { user } = useAuth();
   const { addToast } = useToast();
@@ -74,6 +74,14 @@ export default function HomePage() {
       // Meal selection updates are handled by useMealSelection hook
     };
 
+    const handleMealDeselected = () => {
+      getCurrentMeal();
+    };
+
+    const handleMealConfirmed = () => {
+      getCurrentMeal();
+    };
+
     const handleRecipeAdded = (data: any) => {
       // Recipe additions are handled by useRecipes hook
     };
@@ -91,6 +99,8 @@ export default function HomePage() {
     };
 
     on('meal:selected', handleMealSelected);
+    on('meal:deselected', handleMealDeselected);
+    on('meal:confirmed', handleMealConfirmed);
     on('recipe:added', handleRecipeAdded);
     on('recipe:updated', handleRecipeUpdated);
     on('recipe:deleted', handleRecipeDeleted);
@@ -98,12 +108,14 @@ export default function HomePage() {
 
     return () => {
       off('meal:selected');
+      off('meal:deselected');
+      off('meal:confirmed');
       off('recipe:added');
       off('recipe:updated');
       off('recipe:deleted');
       off('rating:added');
     };
-  }, [on, off]);
+  }, [on, off, getCurrentMeal]);
 
   const toggleFilter = (id: string) => {
     setActiveFilters((prev) =>
