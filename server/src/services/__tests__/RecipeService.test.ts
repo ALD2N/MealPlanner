@@ -1,10 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { RecipeService } from '../RecipeService';
 import { Recipe } from '../../models/Recipe';
 import { Types } from 'mongoose';
 
-// Mock the Recipe model
-vi.mock('../../models/Recipe');
+jest.mock('../../models/Recipe');
 
 describe('RecipeService', () => {
   const mockUserId = new Types.ObjectId().toString();
@@ -30,19 +29,19 @@ describe('RecipeService', () => {
     timesChosen: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    populate: vi.fn(),
-    save: vi.fn(),
+    populate: jest.fn(),
+    save: jest.fn(),
     ...overrides,
   });
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('createRecipe', () => {
     it('creates a recipe with correct data', async () => {
       const mockRecipe = createMockRecipe();
-      (Recipe.create as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.create as any) = jest.fn().mockResolvedValue(mockRecipe);
       mockRecipe.populate.mockResolvedValue(mockRecipe);
 
       const result = await RecipeService.createRecipe(mockRecipeData, mockAuthorId);
@@ -61,11 +60,10 @@ describe('RecipeService', () => {
     });
 
     it('creates recipe without image', async () => {
-      const dataNoImage = { ...mockRecipeData };
-      delete dataNoImage.image;
+      const { image, ...dataNoImage } = mockRecipeData;
 
       const mockRecipe = createMockRecipe({ image: undefined });
-      (Recipe.create as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.create as any) = jest.fn().mockResolvedValue(mockRecipe);
       mockRecipe.populate.mockResolvedValue(mockRecipe);
 
       await RecipeService.createRecipe(dataNoImage, mockAuthorId);
@@ -81,9 +79,9 @@ describe('RecipeService', () => {
         createMockRecipe({ title: 'Recipe 2' }),
       ];
 
-      (Recipe.find as any) = vi.fn().mockReturnValue({
-        populate: vi.fn().mockReturnValue({
-          lean: vi.fn().mockResolvedValue(mockRecipes),
+      (Recipe.find as any) = jest.fn().mockReturnValue({
+        populate: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue(mockRecipes),
         }),
       });
 
@@ -94,9 +92,9 @@ describe('RecipeService', () => {
     });
 
     it('returns empty array when no recipes exist', async () => {
-      (Recipe.find as any) = vi.fn().mockReturnValue({
-        populate: vi.fn().mockReturnValue({
-          lean: vi.fn().mockResolvedValue([]),
+      (Recipe.find as any) = jest.fn().mockReturnValue({
+        populate: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue([]),
         }),
       });
 
@@ -111,8 +109,8 @@ describe('RecipeService', () => {
       const mockRecipe = createMockRecipe();
       const recipeId = mockRecipe._id.toString();
 
-      (Recipe.findById as any) = vi.fn().mockReturnValue({
-        populate: vi.fn().mockResolvedValue(mockRecipe),
+      (Recipe.findById as any) = jest.fn().mockReturnValue({
+        populate: jest.fn().mockResolvedValue(mockRecipe),
       });
 
       const result = await RecipeService.getRecipeById(recipeId);
@@ -124,8 +122,8 @@ describe('RecipeService', () => {
     it('throws error when recipe not found', async () => {
       const recipeId = 'non-existent-id';
 
-      (Recipe.findById as any) = vi.fn().mockReturnValue({
-        populate: vi.fn().mockResolvedValue(null),
+      (Recipe.findById as any) = jest.fn().mockReturnValue({
+        populate: jest.fn().mockResolvedValue(null),
       });
 
       await expect(RecipeService.getRecipeById(recipeId)).rejects.toThrow();
@@ -138,7 +136,7 @@ describe('RecipeService', () => {
       const recipeId = mockRecipe._id.toString();
       const updateData = { title: 'Updated Spaghetti' };
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(mockRecipe);
       mockRecipe.populate.mockResolvedValue(mockRecipe);
 
       const result = await RecipeService.updateRecipe(recipeId, updateData, mockAuthorId);
@@ -151,7 +149,7 @@ describe('RecipeService', () => {
       const recipeId = mockRecipe._id.toString();
       const differentUserId = new Types.ObjectId().toString();
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(mockRecipe);
 
       await expect(
         RecipeService.updateRecipe(recipeId, { title: 'Updated' }, differentUserId)
@@ -161,7 +159,7 @@ describe('RecipeService', () => {
     it('throws error when recipe not found', async () => {
       const recipeId = 'non-existent-id';
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(null);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(null);
 
       await expect(
         RecipeService.updateRecipe(recipeId, { title: 'Updated' }, mockAuthorId)
@@ -174,8 +172,8 @@ describe('RecipeService', () => {
       const mockRecipe = createMockRecipe();
       const recipeId = mockRecipe._id.toString();
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(mockRecipe);
-      (Recipe.findByIdAndDelete as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(mockRecipe);
+      (Recipe.findByIdAndDelete as any) = jest.fn().mockResolvedValue(mockRecipe);
 
       await RecipeService.deleteRecipe(recipeId, mockAuthorId);
 
@@ -187,7 +185,7 @@ describe('RecipeService', () => {
       const recipeId = mockRecipe._id.toString();
       const differentUserId = new Types.ObjectId().toString();
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(mockRecipe);
 
       await expect(RecipeService.deleteRecipe(recipeId, differentUserId)).rejects.toThrow();
     });
@@ -195,7 +193,7 @@ describe('RecipeService', () => {
     it('throws error when recipe not found', async () => {
       const recipeId = 'non-existent-id';
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(null);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(null);
 
       await expect(RecipeService.deleteRecipe(recipeId, mockAuthorId)).rejects.toThrow();
     });
@@ -207,7 +205,7 @@ describe('RecipeService', () => {
       const recipeId = mockRecipe._id.toString();
       const raterId = new Types.ObjectId().toString();
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(mockRecipe);
       mockRecipe.populate.mockResolvedValue(mockRecipe);
 
       const result = await RecipeService.addRating(recipeId, raterId, 5);
@@ -222,7 +220,7 @@ describe('RecipeService', () => {
       });
       const recipeId = mockRecipe._id.toString();
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(mockRecipe);
       mockRecipe.populate.mockResolvedValue(mockRecipe);
 
       await RecipeService.addRating(recipeId, raterId, 5);
@@ -234,7 +232,7 @@ describe('RecipeService', () => {
       const recipeId = 'non-existent-id';
       const raterId = new Types.ObjectId().toString();
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(null);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(null);
 
       await expect(RecipeService.addRating(recipeId, raterId, 5)).rejects.toThrow();
     });
@@ -244,7 +242,7 @@ describe('RecipeService', () => {
       const recipeId = mockRecipe._id.toString();
       const raterId = new Types.ObjectId().toString();
 
-      (Recipe.findById as any) = vi.fn().mockResolvedValue(mockRecipe);
+      (Recipe.findById as any) = jest.fn().mockResolvedValue(mockRecipe);
       mockRecipe.populate.mockResolvedValue(mockRecipe);
 
       for (const rating of [1, 2, 3, 4, 5] as const) {

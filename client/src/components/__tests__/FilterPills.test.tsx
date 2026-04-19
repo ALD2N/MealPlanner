@@ -18,9 +18,9 @@ describe('FilterPills', () => {
         onToggle={() => {}}
       />
     );
-    expect(screen.getByText('🌿 Végétarien')).toBeInTheDocument();
-    expect(screen.getByText('⚡ Rapide')).toBeInTheDocument();
-    expect(screen.getByText('💪 Sain')).toBeInTheDocument();
+    expect(screen.getByText(/Végétarien/)).toBeInTheDocument();
+    expect(screen.getByText(/Rapide/)).toBeInTheDocument();
+    expect(screen.getByText(/Sain/)).toBeInTheDocument();
   });
 
   it('shows × symbol on active filters', () => {
@@ -61,7 +61,7 @@ describe('FilterPills', () => {
       />
     );
 
-    await user.click(screen.getByText('🌿 Végétarien'));
+    await user.click(screen.getByText(/Végétarien/));
     expect(handleToggle).toHaveBeenCalledWith('vege');
   });
 
@@ -77,7 +77,7 @@ describe('FilterPills', () => {
       />
     );
 
-    await user.click(screen.getByText('🌿 Végétarien'));
+    await user.click(screen.getByText(/Végétarien/));
     expect(handleToggle).toHaveBeenCalledWith('vege');
   });
 

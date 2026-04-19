@@ -1,11 +1,15 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import { RecipeService } from '../../services/RecipeService';
 
 // Mock modules
-vi.mock('../../services/RecipeService');
-vi.mock('../../middleware/errorHandler');
+jest.mock('../../services/RecipeService');
+jest.mock('../../middleware/errorHandler');
+
+interface CustomRequest extends Request {
+  userId?: string;
+}
 
 describe('Recipe Routes', () => {
   const mockUserId = new Types.ObjectId().toString();
@@ -25,12 +29,12 @@ describe('Recipe Routes', () => {
     updatedAt: new Date().toISOString(),
   };
 
-  let mockReq: Partial<Request>;
+  let mockReq: Partial<CustomRequest>;
   let mockRes: Partial<Response>;
-  let mockNext: NextFunction;
+  let mockNext: jest.Mock;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     mockReq = {
       userId: mockUserId,
@@ -39,18 +43,18 @@ describe('Recipe Routes', () => {
     };
 
     mockRes = {
-      status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis(),
-      send: vi.fn().mockReturnThis(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+      send: jest.fn().mockReturnThis(),
     };
 
-    mockNext = vi.fn();
+    mockNext = jest.fn();
   });
 
   describe('GET /recipes', () => {
     it('returns list of recipes', async () => {
       const mockRecipes = [mockRecipeData];
-      (RecipeService.getRecipes as any) = vi.fn().mockResolvedValue(mockRecipes);
+      (RecipeService.getRecipes as any) = jest.fn().mockResolvedValue(mockRecipes);
 
       // Status and JSON would be called in real route handler
       expect((RecipeService.getRecipes as any)).toBeDefined();
@@ -58,7 +62,7 @@ describe('Recipe Routes', () => {
 
     it('handles error in service', async () => {
       const error = new Error('Database error');
-      (RecipeService.getRecipes as any) = vi.fn().mockRejectedValue(error);
+      (RecipeService.getRecipes as any) = jest.fn().mockRejectedValue(error);
 
       expect((RecipeService.getRecipes as any)).toBeDefined();
     });
@@ -74,7 +78,7 @@ describe('Recipe Routes', () => {
         tags: ['quick'],
       };
 
-      (RecipeService.createRecipe as any) = vi.fn().mockResolvedValue(mockRecipeData);
+      (RecipeService.createRecipe as any) = jest.fn().mockResolvedValue(mockRecipeData);
 
       expect((RecipeService.createRecipe as any)).toBeDefined();
     });
@@ -97,7 +101,7 @@ describe('Recipe Routes', () => {
         steps: ['cook'],
       };
 
-      (RecipeService.createRecipe as any) = vi.fn().mockResolvedValue(mockRecipeData);
+      (RecipeService.createRecipe as any) = jest.fn().mockResolvedValue(mockRecipeData);
 
       expect((RecipeService.createRecipe as any)).toBeDefined();
     });
@@ -107,7 +111,7 @@ describe('Recipe Routes', () => {
     it('retrieves a recipe by id', async () => {
       mockReq.params = { id: mockRecipeId };
 
-      (RecipeService.getRecipeById as any) = vi.fn().mockResolvedValue(mockRecipeData);
+      (RecipeService.getRecipeById as any) = jest.fn().mockResolvedValue(mockRecipeData);
 
       expect((RecipeService.getRecipeById as any)).toBeDefined();
     });
@@ -116,7 +120,7 @@ describe('Recipe Routes', () => {
       mockReq.params = { id: 'non-existent-id' };
 
       const error = new Error('Recipe not found');
-      (RecipeService.getRecipeById as any) = vi.fn().mockRejectedValue(error);
+      (RecipeService.getRecipeById as any) = jest.fn().mockRejectedValue(error);
 
       expect((RecipeService.getRecipeById as any)).toBeDefined();
     });
@@ -131,7 +135,7 @@ describe('Recipe Routes', () => {
       };
 
       const updatedRecipe = { ...mockRecipeData, title: 'Updated Recipe' };
-      (RecipeService.updateRecipe as any) = vi.fn().mockResolvedValue(updatedRecipe);
+      (RecipeService.updateRecipe as any) = jest.fn().mockResolvedValue(updatedRecipe);
 
       expect((RecipeService.updateRecipe as any)).toBeDefined();
     });
@@ -143,7 +147,7 @@ describe('Recipe Routes', () => {
         // Other fields not provided
       };
 
-      (RecipeService.updateRecipe as any) = vi.fn().mockResolvedValue(mockRecipeData);
+      (RecipeService.updateRecipe as any) = jest.fn().mockResolvedValue(mockRecipeData);
 
       expect((RecipeService.updateRecipe as any)).toBeDefined();
     });
@@ -154,7 +158,7 @@ describe('Recipe Routes', () => {
       mockReq.body = { title: 'Updated' };
 
       const error = new Error('Forbidden: You are not the author');
-      (RecipeService.updateRecipe as any) = vi.fn().mockRejectedValue(error);
+      (RecipeService.updateRecipe as any) = jest.fn().mockRejectedValue(error);
 
       expect((RecipeService.updateRecipe as any)).toBeDefined();
     });
@@ -164,7 +168,7 @@ describe('Recipe Routes', () => {
     it('deletes a recipe', async () => {
       mockReq.params = { id: mockRecipeId };
 
-      (RecipeService.deleteRecipe as any) = vi.fn().mockResolvedValue(undefined);
+      (RecipeService.deleteRecipe as any) = jest.fn().mockResolvedValue(undefined);
 
       expect((RecipeService.deleteRecipe as any)).toBeDefined();
     });
@@ -174,7 +178,7 @@ describe('Recipe Routes', () => {
       mockReq.userId = 'different-user-id';
 
       const error = new Error('Forbidden: You are not the author');
-      (RecipeService.deleteRecipe as any) = vi.fn().mockRejectedValue(error);
+      (RecipeService.deleteRecipe as any) = jest.fn().mockRejectedValue(error);
 
       expect((RecipeService.deleteRecipe as any)).toBeDefined();
     });
@@ -182,7 +186,7 @@ describe('Recipe Routes', () => {
     it('returns 204 on successful deletion', async () => {
       mockReq.params = { id: mockRecipeId };
 
-      (RecipeService.deleteRecipe as any) = vi.fn().mockResolvedValue(undefined);
+      (RecipeService.deleteRecipe as any) = jest.fn().mockResolvedValue(undefined);
 
       // Route handler would call res.status(204).send()
       expect(mockRes.status).toBeDefined();
@@ -198,7 +202,7 @@ describe('Recipe Routes', () => {
         ...mockRecipeData,
         ratings: [{ userId: mockUserId, rating: 5 }],
       };
-      (RecipeService.addRating as any) = vi.fn().mockResolvedValue(recipeWithRating);
+      (RecipeService.addRating as any) = jest.fn().mockResolvedValue(recipeWithRating);
 
       expect((RecipeService.addRating as any)).toBeDefined();
     });
@@ -216,8 +220,8 @@ describe('Recipe Routes', () => {
 
       for (const invalidRating of [0, 6, -1, 10]) {
         mockReq.body = { rating: invalidRating };
-        // Route handler would throw AppError
-        expect(invalidRating).not.toBeGreaterThanOrEqual(1) || expect(invalidRating).not.toBeLessThanOrEqual(5);
+        // Route handler would throw AppError for values outside 1-5
+        expect(invalidRating < 1 || invalidRating > 5).toBe(true);
       }
     });
 
@@ -242,7 +246,7 @@ describe('Recipe Routes', () => {
         ...mockRecipeData,
         ratings: [{ userId: 'user123', rating: 3 }],
       };
-      (RecipeService.addRating as any) = vi.fn().mockResolvedValue(recipeWithUpdatedRating);
+      (RecipeService.addRating as any) = jest.fn().mockResolvedValue(recipeWithUpdatedRating);
 
       expect((RecipeService.addRating as any)).toBeDefined();
     });

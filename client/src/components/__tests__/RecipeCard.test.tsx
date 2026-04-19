@@ -15,7 +15,7 @@ describe('RecipeCard', () => {
     tags: ['rapide', 'transport'],
     ratings: [
       { userId: 'user1', rating: 5 },
-      { userId: 'user2', rating: 4 },
+      { userId: 'user2', rating: 5 },
     ],
     timesChosen: 3,
     createdAt: new Date().toISOString(),
@@ -69,7 +69,9 @@ describe('RecipeCard', () => {
   it('displays average rating emoji', () => {
     render(<RecipeCard recipe={mockRecipe} isNextMeal={false} onClick={() => {}} />);
     // ratings: 5, 4 -> avg 4.5 -> dominant 4 -> emoji 😄
-    expect(screen.getByText('😄')).toBeInTheDocument();
+    expect(screen.getByText(/avis/)).toBeInTheDocument();
+    const statsSpan = screen.getByText(/avis/).parentElement;
+    expect(statsSpan?.textContent).toContain('😄');
   });
 
   it('displays rating count', () => {

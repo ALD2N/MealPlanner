@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { AuthService } from '../AuthService';
-import { config } from '../../config';
 
 describe('AuthService', () => {
   describe('hashPassword', () => {

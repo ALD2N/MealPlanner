@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ToastProvider, useToast, Toast } from '../ToastContext';
 
@@ -108,7 +108,9 @@ describe('ToastContext', () => {
     await user.click(screen.getByRole('button', { name: 'Add Warning Toast' }));
     expect(screen.getByTestId('toast-count')).toHaveTextContent('1');
 
-    vi.advanceTimersByTime(2100);
+    await act(async () => {
+      vi.advanceTimersByTime(2100);
+    });
     expect(screen.getByTestId('toast-count')).toHaveTextContent('0');
   });
 
@@ -140,7 +142,9 @@ describe('ToastContext', () => {
     await user.click(screen.getByRole('button', { name: 'Add Persistent Toast' }));
     expect(screen.getByTestId('toast-count')).toHaveTextContent('1');
 
-    vi.advanceTimersByTime(10000);
+    await act(async () => {
+      vi.advanceTimersByTime(10000);
+    });
     expect(screen.getByTestId('toast-count')).toHaveTextContent('1');
   });
 
@@ -155,10 +159,14 @@ describe('ToastContext', () => {
     await user.click(screen.getByRole('button', { name: 'Add Success Toast' }));
     expect(screen.getByTestId('toast-count')).toHaveTextContent('1');
 
-    vi.advanceTimersByTime(3999);
+    await act(async () => {
+      vi.advanceTimersByTime(3999);
+    });
     expect(screen.getByTestId('toast-count')).toHaveTextContent('1');
 
-    vi.advanceTimersByTime(1);
+    await act(async () => {
+      vi.advanceTimersByTime(1);
+    });
     expect(screen.getByTestId('toast-count')).toHaveTextContent('0');
   });
 

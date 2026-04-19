@@ -164,7 +164,7 @@ describe('RecipeModal', () => {
     const user = userEvent.setup();
     mockOnAddRating.mockResolvedValue(undefined);
 
-    renderWithProvider(
+    const { container } = renderWithProvider(
       <RecipeModal
         recipe={mockRecipe}
         isOpen={true}
@@ -174,8 +174,12 @@ describe('RecipeModal', () => {
       />
     );
 
-    const smileys = screen.getAllByText(/😞|😕|😐|🙂|😄/);
-    await user.click(smileys[4]); // Click the last smiley (5 stars)
+    // Find the rating section and get buttons from it
+    const notationSection = screen.getByText('Noter cette recette').closest('div');
+    const ratingButtons = notationSection?.querySelectorAll('button') || [];
+    if (ratingButtons.length > 0) {
+      await user.click(ratingButtons[4]); // Click the last smiley (5 stars)
+    }
     expect(mockOnAddRating).toHaveBeenCalledWith(5);
   });
 
