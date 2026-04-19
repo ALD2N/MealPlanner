@@ -28,7 +28,7 @@ const SORT_OPTIONS: Array<{ id: string; label: string; field: string | null; dir
 export default function HomePage() {
   const navigate = useNavigate();
   const { recipes, addRating } = useRecipes();
-  const { currentMeal, selectMeal } = useMealSelection();
+  const { currentMeal, selectMeal, deselectMeal, confirmMeal } = useMealSelection();
   const { on, off } = useWebSocket();
   const { user } = useAuth();
   const { addToast } = useToast();
@@ -125,6 +125,24 @@ export default function HomePage() {
     }
   };
 
+  const handleDeselectMeal = async () => {
+    try {
+      await deselectMeal();
+      addToast('Repas déselectionné.', 'success');
+    } catch (err: any) {
+      addToast(err.response?.data?.error || 'Une erreur est survenue', 'error');
+    }
+  };
+
+  const handleConfirmMeal = async () => {
+    try {
+      await confirmMeal();
+      addToast('Bon appétit ! Repas ajouté à l\'historique.', 'success');
+    } catch (err: any) {
+      addToast(err.response?.data?.error || 'Une erreur est survenue', 'error');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -155,7 +173,7 @@ export default function HomePage() {
               <p className="mb-6 opacity-90">
                 par {currentMeal.selectedBy.name} · choisi {currentMeal.recipe.timesChosen}×
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <button
                   onClick={() => setSelectedRecipe(currentMeal.recipe)}
                   className="bg-white text-amber-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition"
@@ -163,10 +181,16 @@ export default function HomePage() {
                   Voir la recette
                 </button>
                 <button
-                  onClick={() => navigate('/history')}
+                  onClick={handleDeselectMeal}
                   className="bg-white bg-opacity-20 text-white px-6 py-2 rounded-full hover:bg-opacity-30 transition"
                 >
-                  Changer
+                  Déselectionner
+                </button>
+                <button
+                  onClick={handleConfirmMeal}
+                  className="bg-white text-green-700 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition"
+                >
+                  On a mangé ça !
                 </button>
               </div>
             </div>
@@ -232,6 +256,7 @@ export default function HomePage() {
           onSelectMeal={handleSelectMeal}
           onAddRating={(rating) => addRating(selectedRecipe._id, rating)}
           currentUserId={user?._id}
+          hasPendingMeal={!!currentMeal}
         />
       )}
     </div>

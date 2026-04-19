@@ -25,7 +25,7 @@ export default function HistoryPage() {
 
   // Sync local history with hook state
   useEffect(() => {
-    setLocalHistory([...history].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    setLocalHistory([...history].sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()));
   }, [history]);
 
   // WebSocket listener for new meal selections
@@ -59,7 +59,8 @@ export default function HistoryPage() {
     }
   };
 
-  const formatDate = (date: Date | string): string => {
+  const formatDate = (date: Date | string | null): string => {
+    if (!date) return 'Date inconnue';
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
