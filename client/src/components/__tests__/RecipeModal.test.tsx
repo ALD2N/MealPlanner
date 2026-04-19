@@ -156,7 +156,7 @@ describe('RecipeModal', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: /Sélectionner pour demain/ }));
+    await user.click(screen.getByRole('button', { name: /Sélectionner pour ce soir/ }));
     expect(mockOnSelectMeal).toHaveBeenCalledWith(mockRecipe._id);
   });
 
@@ -252,5 +252,38 @@ describe('RecipeModal', () => {
     const img = screen.getByAltText('Pasta Carbonara');
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', 'https://example.com/pasta.jpg');
+  });
+
+  describe('hasPendingMeal prop', () => {
+    it('shows "Repas déjà sélectionné" and disables button when hasPendingMeal is true', () => {
+      renderWithProvider(
+        <RecipeModal
+          recipe={mockRecipe}
+          isOpen={true}
+          onClose={mockOnClose}
+          onSelectMeal={mockOnSelectMeal}
+          onAddRating={mockOnAddRating}
+          hasPendingMeal={true}
+        />
+      );
+      const btn = screen.getByRole('button', { name: /Repas déjà sélectionné/ });
+      expect(btn).toBeDisabled();
+      expect(btn).toHaveAttribute('title', 'Un repas est déjà sélectionné');
+    });
+
+    it('shows "Sélectionner pour ce soir" and enables button when hasPendingMeal is false', () => {
+      renderWithProvider(
+        <RecipeModal
+          recipe={mockRecipe}
+          isOpen={true}
+          onClose={mockOnClose}
+          onSelectMeal={mockOnSelectMeal}
+          onAddRating={mockOnAddRating}
+          hasPendingMeal={false}
+        />
+      );
+      const btn = screen.getByRole('button', { name: /Sélectionner pour ce soir/ });
+      expect(btn).not.toBeDisabled();
+    });
   });
 });
