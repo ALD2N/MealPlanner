@@ -11,6 +11,7 @@ interface RecipeModalProps {
   onSelectMeal: (recipeId: string) => Promise<void>;
   onAddRating: (rating: 1 | 2 | 3 | 4 | 5) => Promise<void>;
   currentUserId?: string;
+  hasPendingMeal?: boolean;
 }
 
 function getRatingCounts(ratings: any[]): Record<number, number> {
@@ -28,6 +29,7 @@ export default function RecipeModal({
   onSelectMeal,
   onAddRating,
   currentUserId,
+  hasPendingMeal = false,
 }: RecipeModalProps) {
   const { addToast } = useToast();
   const [isSelectingMeal, setIsSelectingMeal] = useState(false);
@@ -194,14 +196,15 @@ export default function RecipeModal({
           <div className="flex gap-4 flex-wrap">
             <button
               onClick={handleSelectMeal}
-              disabled={isDisabled}
+              disabled={isDisabled || hasPendingMeal}
+              title={hasPendingMeal ? 'Un repas est déjà sélectionné' : undefined}
               className={`flex-1 px-6 py-2 rounded-lg font-medium transition ${
-                isDisabled
+                isDisabled || hasPendingMeal
                   ? 'bg-amber-600 text-white opacity-50 cursor-not-allowed'
                   : 'bg-amber-600 text-white hover:bg-amber-700'
               }`}
             >
-              Sélectionner pour demain
+              {hasPendingMeal ? 'Repas déjà sélectionné' : 'Sélectionner pour ce soir'}
             </button>
 
             {isAuthor && (
