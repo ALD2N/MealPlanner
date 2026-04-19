@@ -3,6 +3,7 @@ import { config } from './config';
 import { connectDB } from './db';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
+import mealsRoutes from './routes/meals';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/meals', mealsRoutes);
 
 // Error handling middleware (must be last)
 app.use(notFoundHandler);
