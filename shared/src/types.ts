@@ -60,7 +60,8 @@ export interface IMealSelection {
   _id?: ObjectId;
   recipe: ObjectId;
   selectedBy: ObjectId;
-  date: Date;
+  status: 'pending' | 'confirmed';
+  date: Date | null;
   createdAt?: Date;
 }
 
@@ -68,7 +69,8 @@ export interface IMealSelectionResponse {
   _id: string;
   recipe: IRecipeResponse;
   selectedBy: IUserResponse;
-  date: Date;
+  status: 'pending' | 'confirmed';
+  date: Date | null;
   createdAt: Date;
 }
 
@@ -112,8 +114,12 @@ export interface IWebSocketPayloads {
   'meal:selected': {
     recipe: IRecipeResponse;
     selectedBy: IUserResponse;
-    date: Date;
+    date: Date | null;
   };
+  'meal:confirmed': {
+    meal: IMealSelectionResponse;
+  };
+  'meal:deselected': Record<string, never>;
   'recipe:added': {
     recipe: IRecipeResponse;
   };
