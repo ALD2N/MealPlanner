@@ -61,3 +61,14 @@ export function broadcastRatingAdded(
 ) {
   io.emit('rating:added', payload);
 }
+
+export function broadcastMealConfirmed(
+  io: SocketIOServer,
+  payload: IWebSocketPayloads['meal:confirmed']
+) {
+  io.emit('meal:confirmed', payload);
+}
+
+export function broadcastMealDeselected(io: SocketIOServer) {
+  io.emit('meal:deselected', {});
+}

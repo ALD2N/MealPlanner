@@ -4,13 +4,17 @@ import { DiscordService } from '../services/DiscordService';
 import { AppError } from '../middleware/errorHandler';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { io } from '../index';
-import { broadcastMealSelected } from '../websocket/handlers';
+import {
+  broadcastMealSelected,
+  broadcastMealConfirmed,
+  broadcastMealDeselected,
+} from '../websocket/handlers';
 
 const router = Router();
 
 /**
  * GET /meals/current
- * Get current meal (today's meal) (auth required)
+ * Returns the pending meal selection, or null.
  */
 router.get('/current', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -23,25 +27,18 @@ router.get('/current', authMiddleware, async (req: AuthRequest, res: Response, n
 
 /**
  * POST /meals/select
- * Select a meal for tomorrow (auth required)
+ * Create a pending meal selection. Fails with 409 if one already exists.
  */
 router.post('/select', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { recipeId } = req.body;
 
-    // Validate required fields
     if (!recipeId) {
       throw new AppError('MISSING_FIELDS', 400, 'recipeId is required');
     }
 
-    // Get tomorrow's date
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const meal = await MealService.selectMeal(recipeId, req.userId as string);
 
-    // Select the meal
-    const meal = await MealService.selectMeal(recipeId, req.userId as string, tomorrow);
-
-    // Notify Discord
     await DiscordService.notifyMealSelected(
       { _id: req.userId as string, name: req.user.name },
       meal.recipe
@@ -56,8 +53,36 @@ router.post('/select', authMiddleware, async (req: AuthRequest, res: Response, n
 });
 
 /**
+ * DELETE /meals/current
+ * Remove the pending meal selection (deselect).
+ */
+router.delete('/current', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    await MealService.deselectMeal();
+    broadcastMealDeselected(io);
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /meals/confirm
+ * Confirm the pending meal (mark as eaten). Adds to history with today's date.
+ */
+router.post('/confirm', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const meal = await MealService.confirmMeal();
+    broadcastMealConfirmed(io, { meal });
+    res.status(200).json({ meal });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * GET /meals/history
- * Get meal history (auth required)
+ * Returns confirmed meal selections sorted by date DESC.
  */
 router.get('/history', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

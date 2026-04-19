@@ -48,6 +48,10 @@ describe('MealService', () => {
     date: null,
     createdAt: new Date(),
     save: jest.fn().mockResolvedValue(undefined),
+    set: jest.fn(function(key: string, value: any) {
+      (this as any)[key] = value;
+      return this;
+    }),
   };
 
   // Helper: mock a chained .populate().populate() query that resolves to `value`
@@ -149,7 +153,16 @@ describe('MealService', () => {
     });
 
     it('sets status to confirmed and date to today', async () => {
-      const savablePending = { ...mockPendingDoc, status: 'pending' as any, date: null as any, save: jest.fn().mockResolvedValue(undefined) };
+      const savablePending = {
+        ...mockPendingDoc,
+        status: 'pending' as any,
+        date: null as any,
+        save: jest.fn().mockResolvedValue(undefined),
+        set: jest.fn(function(key: string, value: any) {
+          (this as any)[key] = value;
+          return this;
+        }),
+      };
       (MealSelection.findOne as any) = jest.fn().mockResolvedValue(savablePending);
       (Recipe.findById as any) = jest.fn().mockResolvedValue({ ...mockRecipeDoc, save: jest.fn().mockResolvedValue(undefined) });
       (MealSelection.findById as any) = jest.fn().mockReturnValue(mockPopulateChain({
@@ -166,7 +179,14 @@ describe('MealService', () => {
     });
 
     it('increments timesChosen on confirm', async () => {
-      const savablePending = { ...mockPendingDoc, save: jest.fn().mockResolvedValue(undefined) };
+      const savablePending = {
+        ...mockPendingDoc,
+        save: jest.fn().mockResolvedValue(undefined),
+        set: jest.fn(function(key: string, value: any) {
+          (this as any)[key] = value;
+          return this;
+        }),
+      };
       const savableRecipe = { ...mockRecipeDoc, timesChosen: 2, save: jest.fn().mockResolvedValue(undefined) };
       (MealSelection.findOne as any) = jest.fn().mockResolvedValue(savablePending);
       (Recipe.findById as any) = jest.fn().mockResolvedValue(savableRecipe);

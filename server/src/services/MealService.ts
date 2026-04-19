@@ -46,8 +46,8 @@ export class MealService {
       throw new AppError('NOT_FOUND', 404, 'No pending meal selection');
     }
 
-    (pending as any).status = 'confirmed';
-    (pending as any).date = new Date();
+    pending.set('status', 'confirmed');
+    pending.set('date', new Date());
     await pending.save();
 
     const recipe = await Recipe.findById(pending.recipe);
