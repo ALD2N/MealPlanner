@@ -7,53 +7,63 @@ import { Types } from 'mongoose';
 export class MealService {
   static async selectMeal(
     recipeId: string,
-    userId: string,
-    date: Date
+    userId: string
   ): Promise<IMealSelectionResponse> {
-    // Verify recipe exists
     const recipe = await Recipe.findById(recipeId);
     if (!recipe) {
       throw new AppError('NOT_FOUND', 404, 'Recipe not found');
     }
 
-    // Normalize date to start of day (00:00:00)
-    const normalizedDate = new Date(date);
-    normalizedDate.setHours(0, 0, 0, 0);
+    const existing = await MealSelection.findOne({ status: 'pending' });
+    if (existing) {
+      throw new AppError('CONFLICT', 409, 'A meal is already selected');
+    }
 
-    // Create meal selection
-    let mealSelection = await MealSelection.create({
+    const mealSelection = await MealSelection.create({
       recipe: new Types.ObjectId(recipeId),
       selectedBy: new Types.ObjectId(userId),
-      date: normalizedDate,
+      status: 'pending',
+      date: null,
     });
 
-    // Increment timesChosen
-    recipe.timesChosen = (recipe.timesChosen || 0) + 1;
-    await recipe.save();
-
-    // Populate and return
     const populated = await MealSelection.findById(mealSelection._id)
       .populate('recipe')
       .populate('selectedBy');
     return this.toResponse(populated as any);
   }
 
+  static async deselectMeal(): Promise<void> {
+    const pending = await MealSelection.findOne({ status: 'pending' });
+    if (!pending) {
+      throw new AppError('NOT_FOUND', 404, 'No pending meal selection');
+    }
+    await MealSelection.deleteOne({ _id: pending._id });
+  }
+
+  static async confirmMeal(): Promise<IMealSelectionResponse> {
+    const pending = await MealSelection.findOne({ status: 'pending' });
+    if (!pending) {
+      throw new AppError('NOT_FOUND', 404, 'No pending meal selection');
+    }
+
+    (pending as any).status = 'confirmed';
+    (pending as any).date = new Date();
+    await pending.save();
+
+    const recipe = await Recipe.findById(pending.recipe);
+    if (recipe) {
+      recipe.timesChosen = (recipe.timesChosen || 0) + 1;
+      await recipe.save();
+    }
+
+    const populated = await MealSelection.findById(pending._id)
+      .populate('recipe')
+      .populate('selectedBy');
+    return this.toResponse(populated as any);
+  }
+
   static async getCurrentMeal(): Promise<IMealSelectionResponse | null> {
-    // Get today at 00:00:00
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Get tomorrow at 00:00:00
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Find meal where date is between today 00:00 and tomorrow 00:00
-    const mealSelection = await MealSelection.findOne({
-      date: {
-        $gte: today,
-        $lt: tomorrow,
-      },
-    })
+    const mealSelection = await MealSelection.findOne({ status: 'pending' })
       .populate('recipe')
       .populate('selectedBy');
 
@@ -65,8 +75,7 @@ export class MealService {
   }
 
   static async getMealHistory(): Promise<IMealSelectionResponse[]> {
-    // Get all past meals sorted by date DESC
-    const mealSelections = await MealSelection.find()
+    const mealSelections = await MealSelection.find({ status: 'confirmed' })
       .sort({ date: -1 })
       .populate('recipe')
       .populate('selectedBy');
@@ -78,7 +87,6 @@ export class MealService {
     const recipe = meal.recipe as any;
     const selectedBy = meal.selectedBy as any;
 
-    // Convert recipe to IRecipeResponse
     const recipeResponse: IRecipeResponse = {
       _id: recipe._id.toString(),
       title: recipe.title,
@@ -102,7 +110,6 @@ export class MealService {
       updatedAt: recipe.updatedAt,
     };
 
-    // Convert selectedBy to IUserResponse
     const selectedByResponse: IUserResponse = {
       _id: selectedBy._id.toString(),
       email: selectedBy.email,
