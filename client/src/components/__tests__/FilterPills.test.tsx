@@ -81,7 +81,7 @@ describe('FilterPills', () => {
     expect(handleToggle).toHaveBeenCalledWith('vege');
   });
 
-  it('applies amber-600 background to active filters', () => {
+  it('applies accent background to active filters', () => {
     const { container } = render(
       <FilterPills
         filters={filters}
@@ -91,7 +91,7 @@ describe('FilterPills', () => {
     );
     const buttons = container.querySelectorAll('button');
     const vegeButton = Array.from(buttons).find(btn => btn.textContent?.includes('Végétarien'));
-    expect(vegeButton).toHaveClass('bg-amber-600', 'text-white');
+    expect(vegeButton).toHaveClass('bg-theme-accent', 'text-theme-accent-text');
   });
 
   it('applies border styles to inactive filters', () => {
@@ -104,7 +104,7 @@ describe('FilterPills', () => {
     );
     const buttons = container.querySelectorAll('button');
     const rapideButton = Array.from(buttons).find(btn => btn.textContent?.includes('Rapide'));
-    expect(rapideButton).toHaveClass('bg-white', 'border', 'border-gray-300');
+    expect(rapideButton).toHaveClass('bg-theme-elevated', 'border', 'border-theme-border');
   });
 
   it('handles multiple active filters', () => {
