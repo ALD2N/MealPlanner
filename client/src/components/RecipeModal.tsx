@@ -72,7 +72,7 @@ export default function RecipeModal({
   const isDisabled = isSelectingMeal || isRating;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-theme-elevated rounded-lg max-w-2xl w-full max-h-screen overflow-auto relative">
         {/* Close Button */}
         <button
