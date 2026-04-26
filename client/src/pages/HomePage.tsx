@@ -5,6 +5,7 @@ import { useMealSelection } from '../hooks/useMealSelection';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../contexts/ToastContext';
+import { useThemeContext } from '../contexts/ThemeContext';
 import { IRecipeResponse } from '@dndmeal/shared';
 import RecipeCard from '../components/RecipeCard';
 import RecipeModal from '../components/RecipeModal';
@@ -32,6 +33,8 @@ export default function HomePage() {
   const { on, off } = useWebSocket();
   const { user } = useAuth();
   const { addToast } = useToast();
+
+  const { theme, toggleTheme } = useThemeContext();
 
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [activeSort, setActiveSort] = useState('magic');
@@ -156,17 +159,30 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-theme-bg">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
+      <header className="bg-theme-elevated border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-gray-900">
-            DnD<span className="italic text-amber-600">Meal</span>
+          <div className="text-2xl font-display font-semibold text-theme-text">
+            DnD<span className="italic font-light text-theme-accent">Meal</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+              className="w-10 h-10 rounded-full bg-theme-surface border border-theme-border flex items-center justify-center text-lg hover:bg-theme-hover transition"
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+            <button
+              onClick={() => navigate('/history')}
+              className="border border-theme-accent text-theme-accent px-4 py-2 rounded-full font-medium hover:bg-theme-accent-pale transition"
+            >
+              Historique
+            </button>
             <button
               onClick={() => navigate('/add-recipe')}
-              className="bg-amber-600 text-white px-4 py-2 rounded-full font-medium hover:bg-amber-700 transition"
+              className="bg-theme-accent text-theme-accent-text px-4 py-2 rounded-full font-medium hover:bg-theme-accent-hover transition"
             >
               + Ajouter une recette
             </button>
@@ -178,29 +194,29 @@ export default function HomePage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Next Meal Banner */}
         {currentMeal ? (
-          <div className="bg-amber-600 text-white rounded-lg p-8 mb-8 flex gap-8 items-center">
+          <div className="bg-theme-accent text-theme-accent-text rounded-lg p-8 mb-8 flex gap-8 items-center">
             <div className="flex-1">
               <div className="text-sm opacity-75 uppercase tracking-wide mb-2">Ce soir on mange</div>
-              <h2 className="text-4xl font-bold mb-2">{currentMeal.recipe.title}</h2>
+              <h2 className="text-4xl font-display font-semibold mb-2">{currentMeal.recipe.title}</h2>
               <p className="mb-6 opacity-90">
                 par {currentMeal.selectedBy.name} · choisi {currentMeal.recipe.timesChosen}×
               </p>
               <div className="flex gap-3 flex-wrap">
                 <button
                   onClick={() => setSelectedRecipe(currentMeal.recipe)}
-                  className="bg-white text-amber-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition"
+                  className="bg-theme-accent-text text-theme-accent px-6 py-2 rounded-full font-bold hover:opacity-90 transition"
                 >
                   Voir la recette
                 </button>
                 <button
                   onClick={handleDeselectMeal}
-                  className="bg-white bg-opacity-20 text-white px-6 py-2 rounded-full hover:bg-opacity-30 transition"
+                  className="bg-white/20 text-theme-accent-text px-6 py-2 rounded-full hover:bg-white/30 transition"
                 >
                   Déselectionner
                 </button>
                 <button
                   onClick={handleConfirmMeal}
-                  className="bg-white text-green-700 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition"
+                  className="bg-theme-accent-text text-green-700 px-6 py-2 rounded-full font-bold hover:opacity-90 transition"
                 >
                   On a mangé ça !
                 </button>
@@ -215,10 +231,10 @@ export default function HomePage() {
             )}
           </div>
         ) : (
-          <div className="bg-amber-100 text-amber-900 rounded-lg p-8 mb-8">
-            <div className="text-sm uppercase tracking-wide mb-2">Ce soir on mange</div>
-            <h2 className="text-3xl font-bold mb-3">Aucun repas sélectionné</h2>
-            <p>Choisissez une recette ci-dessous</p>
+          <div className="bg-theme-accent-pale text-theme-text rounded-lg p-8 mb-8">
+            <div className="text-sm uppercase tracking-wide mb-2 text-theme-muted">Ce soir on mange</div>
+            <h2 className="text-3xl font-display font-semibold mb-3">Aucun repas sélectionné</h2>
+            <p className="text-theme-muted">Choisissez une recette ci-dessous</p>
           </div>
         )}
 
