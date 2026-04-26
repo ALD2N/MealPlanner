@@ -2,8 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Design tokens — light (default) ===== */
+:root {
+  --color-bg:           #faf6f0;
+  --color-bg-elevated:  #fff8f0;
+  --color-bg-hover:     #f2ece3;
+  --color-surface:      #fff8f0;
+  --color-border:       #e8ddd4;
+  --color-text:         #2d1f15;
+  --color-text-muted:   #9a7c6b;
+  --color-text-subtle:  #b8a090;
+  --color-accent:       #d4a017;
+  --color-accent-hover: #b8880f;
+  --color-accent-text:  #2d1f15;
+  --color-accent-pale:  #fdf4d0;
+}
+
+/* ===== Design tokens — dark ===== */
+[data-theme="dark"] {
+  --color-bg:           #1c1712;
+  --color-bg-elevated:  #241f18;
+  --color-bg-hover:     #2e271e;
+  --color-surface:      #221d16;
+  --color-border:       #3a3028;
+  --color-text:         #f0e8dc;
+  --color-text-muted:   #b09a86;
+  --color-text-subtle:  #8a7464;
+}
+
+html {
+  transition: background-color 0.3s;
+}
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s, color 0.3s;
+}
+
 @layer components {
   .toast-base {
-    @apply bg-white border-l-4 rounded-lg shadow-lg p-4 mb-3 animate-slideInRight;
+    @apply bg-theme-elevated border-l-4 rounded-lg shadow-lg p-4 mb-3 animate-slideInRight;
   }
 }
