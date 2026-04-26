@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRecipes } from '../hooks/useRecipes';
 import { useToast } from '../contexts/ToastContext';
+import { useThemeContext } from '../contexts/ThemeContext';
 import api from '../services/api';
 
 interface RecipeFormState {
@@ -23,6 +24,7 @@ export default function AddRecipePage() {
   const [searchParams] = useSearchParams();
   const { addRecipe, updateRecipe } = useRecipes();
   const { addToast } = useToast();
+  const { theme, toggleTheme } = useThemeContext();
 
   const [form, setForm] = useState<RecipeFormState>({
     title: '',
@@ -261,111 +263,96 @@ export default function AddRecipePage() {
 
   if (isLoadingInitial) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white border-b sticky top-0 z-10">
+      <div className="min-h-screen bg-theme-bg">
+        <header className="bg-theme-elevated border-b sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div className="text-2xl font-bold text-gray-900">
-              DnD<span className="italic text-amber-600">Meal</span>
+            <div className="text-2xl font-display font-semibold text-theme-text">
+              DnD<span className="italic font-light text-theme-accent">Meal</span>
             </div>
           </div>
         </header>
         <main className="max-w-2xl mx-auto px-4 py-8">
-          <div className="text-center text-gray-500">Chargement...</div>
+          <div className="text-center text-theme-muted">Chargement...</div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-theme-bg">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
+      <header className="bg-theme-elevated border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-gray-900">
-            DnD<span className="italic text-amber-600">Meal</span>
+          <div className="text-2xl font-display font-semibold text-theme-text">
+            DnD<span className="italic font-light text-theme-accent">Meal</span>
           </div>
+          <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+            className="w-10 h-10 rounded-full bg-theme-surface border border-theme-border flex items-center justify-center text-lg hover:bg-theme-hover transition"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-8">
-        {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-display font-semibold text-theme-text">
             {isEditing ? 'Modifier une recette' : 'Ajouter une recette'}
           </h1>
         </div>
 
-        {/* Global Error */}
         {form.globalError && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             {form.globalError}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Recipe Title */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-theme-text mb-2">
               Nom de la recette <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
               value={form.title}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  title: e.target.value,
-                  errors: {
-                    ...prev.errors,
-                    title: undefined,
-                  },
-                }))
-              }
+              onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value, errors: { ...prev.errors, title: undefined } }))}
               placeholder="Nom de la recette"
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 ${
-                form.errors.title ? 'border-red-300' : 'border-gray-300'
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent bg-theme-elevated text-theme-text ${
+                form.errors.title ? 'border-red-300' : 'border-theme-border'
               }`}
               disabled={form.isLoading}
             />
-            {form.errors.title && (
-              <p className="text-red-600 text-sm mt-1">{form.errors.title}</p>
-            )}
+            {form.errors.title && <p className="text-red-600 text-sm mt-1">{form.errors.title}</p>}
           </div>
 
           {/* Recipe Image */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-theme-text mb-2">
               Image de la recette
             </label>
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
               onChange={handleImageChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+              className="w-full px-3 py-2 border border-theme-border rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent bg-theme-elevated text-theme-text"
               disabled={form.isLoading}
             />
-            {form.errors.image && (
-              <p className="text-red-600 text-sm mt-1">{form.errors.image}</p>
-            )}
+            {form.errors.image && <p className="text-red-600 text-sm mt-1">{form.errors.image}</p>}
             {form.image && (
               <div className="mt-4">
-                <img
-                  src={form.image}
-                  alt="Preview"
-                  className="max-h-48 rounded-lg"
-                />
+                <img src={form.image} alt="Preview" className="max-h-48 rounded-lg" />
               </div>
             )}
-            {!form.image && (
-              <p className="text-gray-500 text-sm mt-2">Aucune image sélectionnée</p>
-            )}
+            {!form.image && <p className="text-theme-muted text-sm mt-2">Aucune image sélectionnée</p>}
           </div>
 
           {/* Ingredients */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-theme-text mb-2">
               Ingrédients <span className="text-red-600">*</span>
             </label>
             <div className="space-y-2 mb-3">
@@ -376,13 +363,13 @@ export default function AddRecipePage() {
                     value={ingredient}
                     onChange={(e) => handleIngredientChange(index, e.target.value)}
                     placeholder={`Ingrédient ${index + 1}`}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+                    className="flex-1 px-3 py-2 border border-theme-border rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent bg-theme-elevated text-theme-text"
                     disabled={form.isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => handleRemoveIngredient(index)}
-                    className="px-3 py-2 text-gray-500 hover:text-red-600 transition"
+                    className="px-3 py-2 text-theme-muted hover:text-red-600 transition"
                     disabled={form.isLoading}
                   >
                     ×
@@ -390,14 +377,12 @@ export default function AddRecipePage() {
                 </div>
               ))}
             </div>
-            {form.errors.ingredients && (
-              <p className="text-red-600 text-sm mb-2">{form.errors.ingredients}</p>
-            )}
+            {form.errors.ingredients && <p className="text-red-600 text-sm mb-2">{form.errors.ingredients}</p>}
             {form.ingredients.length < 20 && (
               <button
                 type="button"
                 onClick={handleAddIngredient}
-                className="text-amber-600 hover:underline cursor-pointer text-sm font-medium"
+                className="text-theme-accent hover:underline cursor-pointer text-sm font-medium"
                 disabled={form.isLoading}
               >
                 + Ajouter un ingrédient
@@ -407,27 +392,25 @@ export default function AddRecipePage() {
 
           {/* Steps */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-theme-text mb-2">
               Étapes <span className="text-red-600">*</span>
             </label>
             <div className="space-y-2 mb-3">
               {form.steps.map((step, index) => (
                 <div key={index} className="flex gap-2">
-                  <span className="flex-shrink-0 w-8 py-2 text-gray-500 text-sm font-medium">
-                    {index + 1}.
-                  </span>
+                  <span className="flex-shrink-0 w-8 py-2 text-theme-muted text-sm font-medium">{index + 1}.</span>
                   <textarea
                     value={step}
                     onChange={(e) => handleStepChange(index, e.target.value)}
                     placeholder={`Étape ${index + 1}`}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 resize-none"
+                    className="flex-1 px-3 py-2 border border-theme-border rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent bg-theme-elevated text-theme-text resize-none"
                     rows={2}
                     disabled={form.isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => handleRemoveStep(index)}
-                    className="px-3 py-2 text-gray-500 hover:text-red-600 transition flex-shrink-0"
+                    className="px-3 py-2 text-theme-muted hover:text-red-600 transition flex-shrink-0"
                     disabled={form.isLoading}
                   >
                     ×
@@ -435,14 +418,12 @@ export default function AddRecipePage() {
                 </div>
               ))}
             </div>
-            {form.errors.steps && (
-              <p className="text-red-600 text-sm mb-2">{form.errors.steps}</p>
-            )}
+            {form.errors.steps && <p className="text-red-600 text-sm mb-2">{form.errors.steps}</p>}
             {form.steps.length < 20 && (
               <button
                 type="button"
                 onClick={handleAddStep}
-                className="text-amber-600 hover:underline cursor-pointer text-sm font-medium"
+                className="text-theme-accent hover:underline cursor-pointer text-sm font-medium"
                 disabled={form.isLoading}
               >
                 + Ajouter une étape
@@ -452,9 +433,7 @@ export default function AddRecipePage() {
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Catégories
-            </label>
+            <label className="block text-sm font-semibold text-theme-text mb-3">Catégories</label>
             <div className="flex gap-2 flex-wrap">
               {AVAILABLE_TAGS.map((tag) => (
                 <button
@@ -463,8 +442,8 @@ export default function AddRecipePage() {
                   onClick={() => handleToggleTag(tag)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                     form.tags.includes(tag)
-                      ? 'bg-amber-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      ? 'bg-theme-accent text-theme-accent-text'
+                      : 'bg-theme-hover text-theme-text hover:bg-theme-surface'
                   }`}
                   disabled={form.isLoading}
                 >
@@ -477,25 +456,21 @@ export default function AddRecipePage() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-3 pt-4 border-t border-theme-border">
             <button
               type="submit"
               disabled={form.isLoading}
-              className="flex-1 bg-amber-600 text-white py-2 rounded-lg font-medium hover:bg-amber-700 disabled:opacity-50 transition"
+              className="flex-1 bg-theme-accent text-theme-accent-text py-2 rounded-lg font-medium hover:bg-theme-accent-hover disabled:opacity-50 transition"
             >
               {form.isLoading
-                ? isEditing
-                  ? 'Modification en cours...'
-                  : 'Sauvegarde en cours...'
-                : isEditing
-                ? 'Modifier la recette'
-                : 'Sauvegarder la recette'}
+                ? isEditing ? 'Modification en cours...' : 'Sauvegarde en cours...'
+                : isEditing ? 'Modifier la recette' : 'Sauvegarder la recette'}
             </button>
             <button
               type="button"
               onClick={handleCancel}
               disabled={form.isLoading}
-              className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 transition"
+              className="flex-1 bg-theme-hover text-theme-text py-2 rounded-lg font-medium hover:bg-theme-surface disabled:opacity-50 transition"
             >
               Annuler
             </button>
