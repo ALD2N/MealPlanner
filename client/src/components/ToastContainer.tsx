@@ -59,7 +59,7 @@ export default function ToastContainer() {
         <div
           key={toast.id}
           className={`
-            bg-white border-l-4 rounded-lg shadow-lg p-4 mb-3
+            bg-theme-elevated border-l-4 rounded-lg shadow-lg p-4 mb-3
             animate-slideInRight pointer-events-auto
             ${getColorClasses(toast.type)}
           `}
@@ -75,7 +75,7 @@ export default function ToastContainer() {
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-gray-400 hover:text-gray-600 cursor-pointer flex-shrink-0 text-xl leading-none"
+              className="text-theme-subtle hover:text-theme-muted cursor-pointer flex-shrink-0 text-xl leading-none"
               aria-label="Close notification"
             >
               ×
