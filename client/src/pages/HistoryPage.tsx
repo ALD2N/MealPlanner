@@ -4,6 +4,7 @@ import { useMealSelection } from '../hooks/useMealSelection';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../contexts/ToastContext';
+import { useThemeContext } from '../contexts/ThemeContext';
 import { IRecipeResponse, IMealSelectionResponse } from '@dndmeal/shared';
 import RecipeModal from '../components/RecipeModal';
 
@@ -13,6 +14,7 @@ export default function HistoryPage() {
   const { on, off } = useWebSocket();
   const { user } = useAuth();
   const { addToast } = useToast();
+  const { theme, toggleTheme } = useThemeContext();
 
   const [selectedRecipe, setSelectedRecipe] = useState<IRecipeResponse | null>(null);
   const [isLoadingMeal, setIsLoadingMeal] = useState<string | null>(null);
@@ -72,55 +74,60 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-theme-bg">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
+      <header className="bg-theme-elevated border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-gray-900">
-            DnD<span className="italic text-amber-600">Meal</span>
+          <div className="text-2xl font-display font-semibold text-theme-text">
+            DnD<span className="italic font-light text-theme-accent">Meal</span>
           </div>
-          <button
-            onClick={() => navigate('/')}
-            className="text-gray-600 hover:text-gray-900 transition"
-          >
-            ← Retour à l'accueil
-          </button>
+          <div className="flex gap-3 items-center">
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+              className="w-10 h-10 rounded-full bg-theme-surface border border-theme-border flex items-center justify-center text-lg hover:bg-theme-hover transition"
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="text-theme-muted hover:text-theme-text transition"
+            >
+              ← Retour à l'accueil
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-display font-semibold text-theme-text mb-2">
             🍽️ Historique des repas
           </h1>
-          <p className="text-gray-600">Les repas sélectionnés par le groupe</p>
+          <p className="text-theme-muted">Les repas sélectionnés par le groupe</p>
         </div>
 
-        {/* Empty State */}
         {localHistory.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <p className="text-gray-500 text-lg mb-6">
+          <div className="bg-theme-elevated rounded-lg border border-theme-border p-12 text-center">
+            <p className="text-theme-muted text-lg mb-6">
               Aucun repas n'a été sélectionné pour le moment
             </p>
             <button
               onClick={() => navigate('/')}
-              className="text-amber-600 hover:text-amber-700 font-medium transition"
+              className="text-theme-accent hover:text-theme-accent-hover font-medium transition"
             >
               Retourner à l'accueil
             </button>
           </div>
         ) : (
-          /* History List */
           <div className="space-y-4">
             {localHistory.map((item) => (
               <div
                 key={item._id}
-                className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition"
+                className="bg-theme-elevated rounded-lg border border-theme-border p-6 hover:shadow-md transition"
               >
                 <div className="flex gap-6 items-start">
-                  {/* Recipe Image */}
                   {item.recipe.image && (
                     <img
                       src={item.recipe.image}
@@ -128,33 +135,24 @@ export default function HistoryPage() {
                       className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                     />
                   )}
-
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
-                    {/* Date */}
-                    <p className="text-sm text-gray-500 uppercase font-medium mb-2">
+                    <p className="text-sm text-theme-muted uppercase font-medium mb-2">
                       {formatDate(item.date)}
                     </p>
-
-                    {/* Recipe Title */}
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    <h3 className="text-lg font-display font-semibold text-theme-text mb-2">
                       {item.recipe.title}
                     </h3>
-
-                    {/* Selected By */}
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="text-theme-muted text-sm mb-4">
                       Choisi par <span className="font-medium">{item.selectedBy.name}</span>
                     </p>
-
-                    {/* Buttons */}
                     <div className="flex gap-3 flex-wrap">
                       <button
                         onClick={() => setSelectedRecipe(item.recipe)}
                         disabled={isLoadingMeal !== null}
                         className={`px-4 py-2 rounded-lg font-medium transition ${
                           isLoadingMeal !== null
-                            ? 'bg-gray-200 text-gray-700 opacity-50 cursor-not-allowed'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-theme-hover text-theme-text opacity-50 cursor-not-allowed'
+                            : 'bg-theme-hover text-theme-text hover:bg-theme-surface'
                         }`}
                       >
                         Voir la recette
@@ -168,17 +166,13 @@ export default function HistoryPage() {
         )}
       </main>
 
-      {/* Recipe Modal */}
       {selectedRecipe && (
         <RecipeModal
           recipe={selectedRecipe}
           isOpen={true}
           onClose={() => setSelectedRecipe(null)}
           onSelectMeal={handleSelectMeal}
-          onAddRating={async () => {
-            // Rating is handled by the hook, just close the modal
-            setSelectedRecipe(null);
-          }}
+          onAddRating={async () => { setSelectedRecipe(null); }}
           currentUserId={user?._id}
           hasPendingMeal={!!currentMeal}
         />
