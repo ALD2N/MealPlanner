@@ -47,25 +47,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
-      {/* Main card */}
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        {/* Logo */}
+    <div className="min-h-screen bg-theme-bg flex items-center justify-center">
+      <div className="bg-theme-elevated rounded-lg shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="text-3xl font-bold text-gray-900">
-            DnD<span className="italic text-amber-600">Meal</span>
+          <div className="text-3xl font-display font-semibold text-theme-text">
+            DnD<span className="italic font-light text-theme-accent">Meal</span>
           </div>
-          <p className="text-gray-500 mt-2">Le carnet de recettes partagé</p>
+          <p className="text-theme-muted mt-2">Le carnet de recettes partagé</p>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setTab('login')}
             className={`flex-1 py-2 px-4 rounded font-medium transition ${
               tab === 'login'
-                ? 'bg-amber-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-theme-accent text-theme-accent-text'
+                : 'bg-theme-hover text-theme-muted hover:bg-theme-surface'
             }`}
           >
             Se connecter
@@ -74,50 +71,48 @@ export default function LoginPage() {
             onClick={() => setTab('register')}
             className={`flex-1 py-2 px-4 rounded font-medium transition ${
               tab === 'register'
-                ? 'bg-amber-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-theme-accent text-theme-accent-text'
+                : 'bg-theme-hover text-theme-muted hover:bg-theme-surface'
             }`}
           >
             S'inscrire
           </button>
         </div>
 
-        {/* Error message */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
 
-        {/* Forms */}
         {tab === 'login' ? (
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="vous@example.com"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-amber-600"
+                className="w-full px-4 py-2 border border-theme-border rounded-lg focus:outline-none focus:border-theme-accent bg-theme-elevated text-theme-text"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Mot de passe</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-amber-600"
+                  className="w-full px-4 py-2 border border-theme-border rounded-lg focus:outline-none focus:border-theme-accent bg-theme-elevated text-theme-text"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-gray-600"
+                  className="absolute right-3 top-2.5 text-theme-muted"
                 >
                   {showPassword ? '🙈' : '👁'}
                 </button>
@@ -126,7 +121,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-amber-600 text-white py-2 rounded-lg font-medium hover:bg-amber-700 disabled:opacity-50 transition"
+              className="w-full bg-theme-accent text-theme-accent-text py-2 rounded-lg font-medium hover:bg-theme-accent-hover disabled:opacity-50 transition"
             >
               {isLoading ? 'Connexion...' : 'Se connecter'}
             </button>
@@ -134,42 +129,42 @@ export default function LoginPage() {
         ) : (
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Prénom</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Marie, Thomas..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-amber-600"
+                className="w-full px-4 py-2 border border-theme-border rounded-lg focus:outline-none focus:border-theme-accent bg-theme-elevated text-theme-text"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="vous@example.com"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-amber-600"
+                className="w-full px-4 py-2 border border-theme-border rounded-lg focus:outline-none focus:border-theme-accent bg-theme-elevated text-theme-text"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Mot de passe</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-amber-600"
+                  className="w-full px-4 py-2 border border-theme-border rounded-lg focus:outline-none focus:border-theme-accent bg-theme-elevated text-theme-text"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-gray-600"
+                  className="absolute right-3 top-2.5 text-theme-muted"
                 >
                   {showPassword ? '🙈' : '👁'}
                 </button>
@@ -183,7 +178,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-amber-600 text-white py-2 rounded-lg font-medium hover:bg-amber-700 disabled:opacity-50 transition"
+              className="w-full bg-theme-accent text-theme-accent-text py-2 rounded-lg font-medium hover:bg-theme-accent-hover disabled:opacity-50 transition"
             >
               {isLoading ? 'Inscription...' : "S'inscrire"}
             </button>
