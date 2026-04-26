@@ -73,11 +73,11 @@ export default function RecipeModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-auto relative">
+      <div className="bg-theme-elevated rounded-lg max-w-2xl w-full max-h-screen overflow-auto relative">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold z-10"
+          className="absolute top-4 right-4 text-theme-muted hover:text-theme-text text-2xl font-bold z-10"
         >
           ×
         </button>
@@ -93,16 +93,16 @@ export default function RecipeModal({
             />
           )}
 
-          <h1 className="text-3xl font-bold mb-2">{recipe.title}</h1>
-          <p className="text-gray-600 mb-6">par {recipe.author.name}</p>
+          <h1 className="text-3xl font-display font-semibold text-theme-text mb-2">{recipe.title}</h1>
+          <p className="text-theme-muted mb-6">par {recipe.author.name}</p>
 
           {/* Ingredients Section */}
           {recipe.ingredients.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4">Ingrédients</h2>
+              <h2 className="text-xl font-display font-semibold text-theme-text mb-4">Ingrédients</h2>
               <div className="grid grid-cols-2 gap-4">
                 {recipe.ingredients.map((ingredient, idx) => (
-                  <li key={idx} className="text-gray-700">
+                  <li key={idx} className="text-theme-muted">
                     {ingredient}
                   </li>
                 ))}
@@ -113,14 +113,14 @@ export default function RecipeModal({
           {/* Steps Section */}
           {recipe.steps.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4">Étapes</h2>
+              <h2 className="text-xl font-display font-semibold text-theme-text mb-4">Étapes</h2>
               <ol className="space-y-3">
                 {recipe.steps.map((step, idx) => (
                   <li key={idx} className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    <span className="flex-shrink-0 w-6 h-6 bg-theme-accent text-theme-accent-text rounded-full flex items-center justify-center text-sm font-bold">
                       {idx + 1}
                     </span>
-                    <span className="text-gray-700 pt-0.5">{step}</span>
+                    <span className="text-theme-muted pt-0.5">{step}</span>
                   </li>
                 ))}
               </ol>
@@ -133,7 +133,7 @@ export default function RecipeModal({
               {recipe.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs"
+                  className="bg-theme-hover text-theme-subtle rounded-full px-3 py-1 text-xs"
                 >
                   {tag}
                 </span>
@@ -143,9 +143,9 @@ export default function RecipeModal({
 
           {/* Rating Distribution Section */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Notations des joueurs</h2>
+            <h2 className="text-xl font-display font-semibold text-theme-text mb-4">Notations des joueurs</h2>
             {recipe.ratings.length === 0 ? (
-              <p className="text-gray-500">Aucune notation</p>
+              <p className="text-theme-muted">Aucune notation</p>
             ) : (
               <div className="space-y-2">
                 {SMILEYS.map((smiley, idx) => {
@@ -156,15 +156,15 @@ export default function RecipeModal({
                   return (
                     <div key={idx} className="flex items-center gap-3">
                       <span className="text-2xl w-8 text-center">{smiley}</span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                      <div className="flex-1 bg-theme-hover rounded-full h-6 overflow-hidden">
                         <div
-                          className="bg-amber-600 h-full flex items-center justify-center text-white text-xs font-medium transition-all duration-200"
+                          className="bg-theme-accent h-full flex items-center justify-center text-theme-accent-text text-xs font-medium transition-all duration-200"
                           style={{ width: `${barWidth}%` }}
                         >
                           {count > 0 && count}
                         </div>
                       </div>
-                      <span className="text-gray-600 text-sm w-8 text-right">{count}</span>
+                      <span className="text-theme-muted text-sm w-8 text-right">{count}</span>
                     </div>
                   );
                 })}
@@ -174,7 +174,7 @@ export default function RecipeModal({
 
           {/* Rating Input Section */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Noter cette recette</h2>
+            <h2 className="text-xl font-display font-semibold text-theme-text mb-4">Noter cette recette</h2>
             <div className="flex justify-center gap-4">
               {SMILEYS.map((smiley, idx) => {
                 const rating = (idx + 1) as 1 | 2 | 3 | 4 | 5;
@@ -183,7 +183,7 @@ export default function RecipeModal({
                     key={idx}
                     onClick={() => handleAddRating(rating)}
                     disabled={isDisabled}
-                    className="text-4xl hover:scale-125 hover:text-amber-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-4xl hover:scale-125 hover:text-theme-accent transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {smiley}
                   </button>
@@ -200,8 +200,8 @@ export default function RecipeModal({
               title={hasPendingMeal ? 'Un repas est déjà sélectionné' : undefined}
               className={`flex-1 px-6 py-2 rounded-lg font-medium transition ${
                 isDisabled || hasPendingMeal
-                  ? 'bg-amber-600 text-white opacity-50 cursor-not-allowed'
-                  : 'bg-amber-600 text-white hover:bg-amber-700'
+                  ? 'bg-theme-accent text-theme-accent-text opacity-50 cursor-not-allowed'
+                  : 'bg-theme-accent text-theme-accent-text hover:bg-theme-accent-hover'
               }`}
             >
               {hasPendingMeal ? 'Repas déjà sélectionné' : 'Sélectionner pour ce soir'}
@@ -212,8 +212,8 @@ export default function RecipeModal({
                 disabled={isDisabled}
                 className={`flex-1 px-6 py-2 rounded-lg font-medium transition ${
                   isDisabled
-                    ? 'bg-gray-200 text-gray-700 opacity-50 cursor-not-allowed'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-theme-hover text-theme-text opacity-50 cursor-not-allowed'
+                    : 'bg-theme-hover text-theme-text hover:bg-theme-surface'
                 }`}
               >
                 Modifier
@@ -225,8 +225,8 @@ export default function RecipeModal({
               disabled={isDisabled}
               className={`flex-1 px-6 py-2 rounded-lg font-medium transition ${
                 isDisabled
-                  ? 'bg-gray-200 text-gray-700 opacity-50 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-theme-hover text-theme-text opacity-50 cursor-not-allowed'
+                  : 'bg-theme-hover text-theme-text hover:bg-theme-surface'
               }`}
             >
               Fermer
