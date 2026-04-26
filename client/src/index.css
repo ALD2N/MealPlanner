@@ -28,6 +28,9 @@
   --color-text:         #f0e8dc;
   --color-text-muted:   #b09a86;
   --color-text-subtle:  #8a7464;
+  --color-accent:       #d4a017;
+  --color-accent-hover: #b8880f;
+  --color-accent-text:  #2d1f15;
   --color-accent-pale:  #2d2400;
 }
 

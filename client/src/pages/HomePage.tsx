@@ -216,7 +216,7 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={handleConfirmMeal}
-                  className="bg-theme-accent-text text-green-700 px-6 py-2 rounded-full font-bold hover:opacity-90 transition"
+                  className="bg-green-600 text-white px-6 py-2 rounded-full font-bold hover:bg-green-700 transition"
                 >
                   On a mangé ça !
                 </button>
