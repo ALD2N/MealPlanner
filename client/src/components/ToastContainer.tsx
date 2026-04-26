@@ -71,7 +71,7 @@ export default function ToastContainer() {
               <span className={`text-lg font-bold flex-shrink-0 ${getIconColorClasses(toast.type)}`}>
                 {getIcon(toast.type)}
               </span>
-              <p className="text-sm font-medium">{toast.message}</p>
+              <p className="text-sm font-medium text-theme-text">{toast.message}</p>
             </div>
             <button
               onClick={() => removeToast(toast.id)}
