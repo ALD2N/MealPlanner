@@ -14,11 +14,11 @@ interface SortBarProps {
 export default function SortBar({ options, activeSort, onSortChange }: SortBarProps) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-gray-600">Trier par</span>
+      <span className="text-theme-muted">Trier par</span>
       <select
         value={activeSort}
         onChange={(e) => onSortChange(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-600"
+        className="px-4 py-2 border border-theme-border rounded-lg bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent"
       >
         {options.map((option) => (
           <option key={option.id} value={option.id}>

@@ -13,8 +13,8 @@ export default function FilterPills({ filters, activeFilters, onToggle }: Filter
           onClick={() => onToggle(filter.id)}
           className={`px-4 py-2 rounded-full transition ${
             activeFilters.includes(filter.id)
-              ? 'bg-amber-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-700 hover:border-amber-600'
+              ? 'bg-theme-accent text-theme-accent-text'
+              : 'bg-theme-elevated border border-theme-border text-theme-muted hover:border-theme-accent hover:text-theme-text'
           }`}
         >
           {filter.label} {activeFilters.includes(filter.id) && '×'}
