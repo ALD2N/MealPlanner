@@ -108,11 +108,10 @@ router.put('/:id/selectedBy', authMiddleware, async (req: AuthRequest, res: Resp
     }
 
     const meal = await MealService.updateMealSelectedBy(id, userId);
-    const mealWithUser = await MealService.getMealWithUser(meal._id as string);
 
-    broadcastMealUpdated(io, { meal: mealWithUser });
+    broadcastMealUpdated(io, { meal });
 
-    res.status(200).json({ meal: mealWithUser });
+    res.status(200).json({ meal });
   } catch (error) {
     next(error);
   }
