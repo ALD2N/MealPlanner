@@ -119,6 +119,9 @@ export interface IWebSocketPayloads {
   'meal:confirmed': {
     meal: IMealSelectionResponse;
   };
+  'meal:updated': {
+    meal: IMealSelectionResponse;
+  };
   'meal:deselected': Record<string, never>;
   'recipe:added': {
     recipe: IRecipeResponse;
