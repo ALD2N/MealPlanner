@@ -138,6 +138,15 @@ export default function HistoryPage() {
             DnD<span className="italic font-light text-theme-accent">Meal</span>
           </div>
           <div className="flex gap-3 items-center">
+            {user?.isAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="px-4 py-2 rounded-lg font-medium bg-theme-hover text-theme-text hover:bg-theme-surface transition"
+                title="Accéder au panneau d'administration"
+              >
+                ⚙️ Admin
+              </button>
+            )}
             <button
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
