@@ -47,6 +47,12 @@ export function useMealSelection() {
     await getHistory();
   }, [getHistory]);
 
+  const updateMealSelectedBy = useCallback(async (mealId: string, userId: string) => {
+    const res = await api.put(`/meals/${mealId}/selectedBy`, { userId });
+    await getHistory();
+    return res.data.meal;
+  }, [getHistory]);
+
   useEffect(() => {
     getCurrentMeal();
     getHistory();
@@ -62,5 +68,6 @@ export function useMealSelection() {
     deselectMeal,
     confirmMeal,
     getHistory,
+    updateMealSelectedBy,
   };
 }
