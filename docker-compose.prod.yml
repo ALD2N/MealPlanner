@@ -3,21 +3,21 @@ version: '3.8'
 services:
   mongo:
     image: mongo:6.0
-    container_name: dndmeal-mongo-prod
+    container_name: mealplanner-mongo-prod
     environment:
-      MONGO_INITDB_DATABASE: dndmeal
+      MONGO_INITDB_DATABASE: mealplanner
     volumes:
       - mongodb_data:/data/db
     restart: always
     networks:
-      - dndmeal
+      - mealplanner
 
   server:
     build:
       context: .
       dockerfile: server/Dockerfile
       target: prod
-    container_name: dndmeal-server-prod
+    container_name: mealplanner-server-prod
     ports:
       - "5000:5000"
     environment:
@@ -29,25 +29,25 @@ services:
       - mongo
     restart: always
     networks:
-      - dndmeal
+      - mealplanner
 
   client:
     build:
       context: .
       dockerfile: client/Dockerfile
       target: prod
-    container_name: dndmeal-client-prod
+    container_name: mealplanner-client-prod
     ports:
       - "80:80"
     depends_on:
       - server
     restart: always
     networks:
-      - dndmeal
+      - mealplanner
 
 volumes:
   mongodb_data:
 
 networks:
-  dndmeal:
+  mealplanner:
     driver: bridge
