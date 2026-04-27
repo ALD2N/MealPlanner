@@ -93,4 +93,28 @@ router.get('/history', authMiddleware, async (req: AuthRequest, res: Response, n
   }
 });
 
+/**
+ * PUT /meals/:id/selectedBy
+ * Update who selected a meal (auth required, any user can call)
+ */
+router.put('/:id/selectedBy', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    if (!userId) {
+      throw new AppError('MISSING_FIELDS', 400, 'userId is required');
+    }
+
+    const meal = await MealService.updateMealSelectedBy(id, userId);
+
+    // TODO: Uncomment when broadcastMealUpdated is implemented in Task 4
+    // broadcastMealUpdated(io, { meal });
+
+    res.status(200).json({ meal });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
