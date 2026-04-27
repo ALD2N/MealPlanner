@@ -51,7 +51,7 @@ export default function LoginPage() {
       <div className="bg-theme-elevated rounded-lg shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="text-3xl font-display font-semibold text-theme-text">
-            DnD<span className="italic font-light text-theme-accent">Meal</span>
+            Meal<span className="italic font-light text-theme-accent">Planner</span>
           </div>
           <p className="text-theme-muted mt-2">Le carnet de recettes partagé</p>
         </div>

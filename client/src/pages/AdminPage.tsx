@@ -64,7 +64,7 @@ export default function AdminPage() {
       <header className="bg-theme-elevated border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="text-2xl font-display font-semibold text-theme-text">
-            DnD<span className="italic font-light text-theme-accent">Meal</span>
+            Meal<span className="italic font-light text-theme-accent">Planner</span>
           </div>
           <div className="flex gap-3 items-center">
             <button
