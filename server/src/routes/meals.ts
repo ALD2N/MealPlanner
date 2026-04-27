@@ -8,6 +8,7 @@ import {
   broadcastMealSelected,
   broadcastMealConfirmed,
   broadcastMealDeselected,
+  broadcastMealUpdated,
 } from '../websocket/handlers';
 
 const router = Router();
@@ -107,11 +108,11 @@ router.put('/:id/selectedBy', authMiddleware, async (req: AuthRequest, res: Resp
     }
 
     const meal = await MealService.updateMealSelectedBy(id, userId);
+    const mealWithUser = await MealService.getMealWithUser(meal._id as string);
 
-    // TODO: Uncomment when broadcastMealUpdated is implemented in Task 4
-    // broadcastMealUpdated(io, { meal });
+    broadcastMealUpdated(io, { meal: mealWithUser });
 
-    res.status(200).json({ meal });
+    res.status(200).json({ meal: mealWithUser });
   } catch (error) {
     next(error);
   }
