@@ -5,7 +5,7 @@ import api from '../../services/api';
 
 vi.mock('../../services/api');
 
-const mockApi = vi.mocked(api);
+const mockApi = api as any;
 
 describe('useAdminInvites', () => {
   beforeEach(() => {
