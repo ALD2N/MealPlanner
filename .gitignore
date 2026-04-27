@@ -10,3 +10,5 @@ build/
 *.db
 mongodb_data/
 .dockerignore
+.superpowers/
+*.lock
