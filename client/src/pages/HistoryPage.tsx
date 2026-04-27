@@ -147,7 +147,7 @@ export default function HistoryPage() {
             </button>
             <button
               onClick={() => navigate('/')}
-              className="text-theme-muted hover:text-theme-text transition"
+              className="px-4 py-2 rounded-lg font-medium bg-theme-hover text-theme-text hover:bg-theme-surface transition"
             >
               ← Retour à l'accueil
             </button>
