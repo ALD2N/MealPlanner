@@ -3,11 +3,11 @@ version: '3.8'
 services:
   mongo:
     image: mongo:6.0
-    container_name: dndmeal-mongo
+    container_name: mealplanner-mongo
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: dndmeal
+      MONGO_INITDB_DATABASE: mealplanner
     volumes:
       - mongodb_data:/data/db
     healthcheck:
@@ -21,11 +21,11 @@ services:
       context: .
       dockerfile: server/Dockerfile
       target: dev
-    container_name: dndmeal-server
+    container_name: mealplanner-server
     ports:
       - "5000:5000"
     environment:
-      MONGODB_URI: mongodb://mongo:27017/dndmeal
+      MONGODB_URI: mongodb://mongo:27017/mealplanner
       NODE_ENV: development
       JWT_SECRET: dev-secret-key
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
@@ -36,14 +36,14 @@ services:
       - ./server/src:/app/server/src
       - ./shared/src:/app/shared/src
     networks:
-      - dndmeal
+      - mealplanner
 
   client:
     build:
       context: .
       dockerfile: client/Dockerfile
       target: dev
-    container_name: dndmeal-client
+    container_name: mealplanner-client
     ports:
       - "3000:3000"
     environment:
@@ -55,11 +55,11 @@ services:
       - ./client/src:/app/client/src
       - ./client/index.html:/app/client/index.html
     networks:
-      - dndmeal
+      - mealplanner
 
 volumes:
   mongodb_data:
 
 networks:
-  dndmeal:
+  mealplanner:
     driver: bridge
