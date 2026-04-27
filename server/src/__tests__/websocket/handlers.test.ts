@@ -9,9 +9,10 @@ describe('broadcastMealUpdated', () => {
     const meal = {
       _id: 'meal123',
       recipe: {},
-      selectedBy: { _id: 'user456', name: 'Alice' },
-      status: 'confirmed',
+      selectedBy: { _id: 'user456', name: 'Alice', email: 'alice@example.com', isAdmin: false, createdAt: new Date() },
+      status: 'confirmed' as const,
       date: new Date(),
+      createdAt: new Date(),
     };
 
     broadcastMealUpdated(mockIo as any, { meal });
