@@ -5,8 +5,14 @@ let mongoServer: any = null;
 
 export async function connectDB() {
   try {
-    // Use in-memory MongoDB for development if real MongoDB is unavailable
-    if (config.NODE_ENV === 'development') {
+    // Skip MongoMemoryServer if MONGODB_URI is explicitly set (Docker/production)
+    // or if running on Alpine Linux (MongoMemoryServer incompatible)
+    const useMongoMemory =
+      config.NODE_ENV === 'development' &&
+      !process.env.MONGODB_URI &&
+      !isAlpineLinux();
+
+    if (useMongoMemory) {
       try {
         const { MongoMemoryServer } = await import('mongodb-memory-server');
         mongoServer = await MongoMemoryServer.create();
@@ -24,6 +30,16 @@ export async function connectDB() {
   } catch (error) {
     console.error('✗ MongoDB connection error:', error);
     process.exit(1);
+  }
+}
+
+function isAlpineLinux(): boolean {
+  try {
+    // Check if running on Alpine Linux
+    const fs = require('fs');
+    return fs.existsSync('/etc/alpine-release');
+  } catch {
+    return false;
   }
 }
 
