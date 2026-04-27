@@ -89,6 +89,25 @@ export class MealService {
     return mealSelections.map(meal => this.toResponse(meal));
   }
 
+  static async updateMealSelectedBy(
+    mealId: string,
+    userId: string
+  ): Promise<IMealSelectionResponse> {
+    const meal = await MealSelection.findByIdAndUpdate(
+      mealId,
+      { selectedBy: new Types.ObjectId(userId) },
+      { new: true }
+    )
+      .populate('recipe')
+      .populate('selectedBy');
+
+    if (!meal) {
+      throw new AppError('MEAL_NOT_FOUND', 404, 'Meal not found');
+    }
+
+    return this.toResponse(meal);
+  }
+
   static toResponse(meal: any): IMealSelectionResponse {
     const recipe = meal.recipe as any;
     const selectedBy = meal.selectedBy as any;
