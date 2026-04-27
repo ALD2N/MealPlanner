@@ -3,6 +3,7 @@ import { AuthService } from '../services/AuthService';
 import { InviteService } from '../services/InviteService';
 import { AppError } from '../middleware/errorHandler';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { User } from '../models/User';
 
 const router = Router();
 
@@ -100,5 +101,19 @@ router.get(
     }
   }
 );
+
+/**
+ * GET /auth/users
+ * Returns all registered users (auth required)
+ */
+router.get('/users', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const users = await User.find({}, { passwordHash: 0 }).lean();
+    const userResponses = users.map(user => AuthService.userToResponse(user));
+    res.status(200).json({ users: userResponses });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;
