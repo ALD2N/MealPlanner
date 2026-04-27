@@ -5,12 +5,14 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../contexts/ToastContext';
 import { useThemeContext } from '../contexts/ThemeContext';
-import { IRecipeResponse, IMealSelectionResponse } from '@dndmeal/shared';
+import { IRecipeResponse, IMealSelectionResponse, IUserResponse } from '@dndmeal/shared';
 import RecipeModal from '../components/RecipeModal';
+import { ChangeUserModal } from '../components/ChangeUserModal';
+import api from '../services/api';
 
 export default function HistoryPage() {
   const navigate = useNavigate();
-  const { currentMeal, history, selectMeal, getHistory } = useMealSelection();
+  const { currentMeal, history, selectMeal, getHistory, updateMealSelectedBy } = useMealSelection();
   const { on, off } = useWebSocket();
   const { user } = useAuth();
   const { addToast } = useToast();
@@ -19,6 +21,10 @@ export default function HistoryPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<IRecipeResponse | null>(null);
   const [isLoadingMeal, setIsLoadingMeal] = useState<string | null>(null);
   const [localHistory, setLocalHistory] = useState<IMealSelectionResponse[]>([]);
+  const [allUsers, setAllUsers] = useState<IUserResponse[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [mealToChangeId, setMealToChangeId] = useState<string | null>(null);
+  const [isChangingUser, setIsChangingUser] = useState(false);
 
   // Initialize history on mount
   useEffect(() => {
@@ -43,6 +49,37 @@ export default function HistoryPage() {
     };
   }, [on, off, getHistory]);
 
+  // Fetch all users on mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoadingUsers(true);
+      try {
+        const res = await api.get('/auth/users');
+        setAllUsers(res.data.users);
+      } catch (err) {
+        console.error('Failed to fetch users:', err);
+        addToast('Erreur lors du chargement des utilisateurs', 'error');
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+  }, [addToast]);
+
+  // WebSocket listener for meal updates
+  useEffect(() => {
+    const handleMealUpdated = () => {
+      getHistory();
+    };
+
+    on('meal:updated', handleMealUpdated);
+
+    return () => {
+      off('meal:updated', handleMealUpdated);
+    };
+  }, [on, off, getHistory]);
+
   const handleSelectMeal = async (recipeId: string) => {
     setIsLoadingMeal(recipeId);
     try {
@@ -58,6 +95,25 @@ export default function HistoryPage() {
       addToast(message, 'error');
     } finally {
       setIsLoadingMeal(null);
+    }
+  };
+
+  const handleChangeUser = async (userId: string) => {
+    if (!mealToChangeId) return;
+
+    setIsChangingUser(true);
+    try {
+      await updateMealSelectedBy(mealToChangeId, userId);
+      addToast('Personne changée!', 'success');
+      setMealToChangeId(null);
+    } catch (err: any) {
+      const message =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        'Une erreur est survenue';
+      addToast(message, 'error');
+    } finally {
+      setIsChangingUser(false);
     }
   };
 
@@ -157,6 +213,17 @@ export default function HistoryPage() {
                       >
                         Voir la recette
                       </button>
+                      <button
+                        onClick={() => setMealToChangeId(item._id)}
+                        disabled={isLoadingMeal !== null || isChangingUser}
+                        className={`px-4 py-2 rounded-lg font-medium transition ${
+                          isLoadingMeal !== null || isChangingUser
+                            ? 'bg-theme-hover text-theme-text opacity-50 cursor-not-allowed'
+                            : 'bg-theme-hover text-theme-text hover:bg-theme-surface'
+                        }`}
+                      >
+                        Changer
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -177,6 +244,15 @@ export default function HistoryPage() {
           hasPendingMeal={!!currentMeal}
         />
       )}
+
+      <ChangeUserModal
+        isOpen={mealToChangeId !== null}
+        onClose={() => setMealToChangeId(null)}
+        onConfirm={handleChangeUser}
+        currentUserId={localHistory.find(m => m._id === mealToChangeId)?.selectedBy._id || ''}
+        users={allUsers}
+        isLoading={isChangingUser}
+      />
     </div>
   );
 }
