@@ -17,7 +17,7 @@ interface RecipeFormState {
 }
 
 const AVAILABLE_TAGS = ['vege', 'rapide', 'transport'];
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
 
 export default function AddRecipePage() {
   const navigate = useNavigate();
