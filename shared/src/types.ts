@@ -1,4 +1,5 @@
-import { ObjectId } from 'mongoose';
+// ObjectId type compatible with both client and server
+export type ObjectId = string;
 
 // ===== User =====
 export interface IUser {

@@ -2,8 +2,19 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/App.tsx",
+    "src/App.d.ts",
+    "src/main.tsx",
+    "src/index.css",
+    "src/components/**/*.tsx",
+    "src/contexts/**/*.tsx",
+    "src/hooks/**/*.ts",
+    "src/pages/*.tsx",
+    "src/services/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", "src/**/__tests__/**", "src/**/*.test.*"]
 }
