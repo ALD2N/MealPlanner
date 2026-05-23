@@ -32,6 +32,7 @@ services:
       MONGODB_URI: mongodb://mongo:27017/mealplanner
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: https://mealplanner.deathgotchi.site
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
     depends_on:
       mongo:

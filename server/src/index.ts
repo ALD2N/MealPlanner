@@ -20,7 +20,7 @@ export const io = new SocketIOServer(server, {
   },
 });
 
-app.use(cors());
+app.use(cors({ origin: config.CORS_ORIGIN, credentials: true }));
 app.use(express.json({ limit: '20mb' }));
 
 app.get('/health', (req, res) => {
