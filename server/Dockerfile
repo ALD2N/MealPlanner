@@ -14,6 +14,6 @@ WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* tsconfig.json ./
 COPY shared ./shared
 COPY server ./server
-RUN npm ci && cd server && npm run build && cd ..
+RUN npm ci && cd shared && npm run build && cd .. && cd server && npm run build && cd ..
 EXPOSE 5000
 CMD ["npm", "--prefix", "server", "start"]
