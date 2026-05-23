@@ -44,7 +44,7 @@ services:
       target: prod
     container_name: mealplanner-client-prod
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - server
     restart: always
