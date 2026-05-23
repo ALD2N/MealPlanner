@@ -14,12 +14,8 @@ WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* tsconfig.json ./
 COPY shared ./shared
 COPY client ./client
-RUN set -e && \
-    echo "Installing dependencies..." && \
-    npm ci && \
-    echo "Building client..." && \
-    npm --prefix client run build && \
-    echo "Build complete!"
+RUN npm ci --verbose
+RUN npm --prefix client run build
 
 # Production stage
 FROM nginx:alpine AS prod
