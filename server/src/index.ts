@@ -47,8 +47,36 @@ app.use(errorHandler);
 // Setup WebSocket handlers
 setupWebSocketHandlers(io);
 
+async function cleanOrphanedMeals() {
+  try {
+    const { MealSelection } = await import('./models/MealSelection.js');
+    const { Recipe } = await import('./models/Recipe.js');
+    const { User } = await import('./models/User.js');
+
+    const meals = await MealSelection.find({ status: 'confirmed' });
+    let deleted = 0;
+
+    for (const meal of meals) {
+      const recipe = await Recipe.findById(meal.recipe);
+      const user = await User.findById(meal.selectedBy);
+
+      if (!recipe || !user) {
+        await MealSelection.deleteOne({ _id: meal._id });
+        deleted++;
+      }
+    }
+
+    if (deleted > 0) {
+      console.log(`✓ Cleaned ${deleted} orphaned meal(s)`);
+    }
+  } catch (error) {
+    console.error('Error cleaning orphaned meals:', error);
+  }
+}
+
 async function start() {
   await connectDB();
+  await cleanOrphanedMeals();
   server.listen(config.PORT, () => {
     console.log(`Server running on port ${config.PORT}`);
   });
