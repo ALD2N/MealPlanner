@@ -8,8 +8,8 @@ export class RecipeService {
     data: {
       title: string;
       image?: string;
-      ingredients: string[];
-      steps: string[];
+      ingredients?: string[];
+      steps?: string[];
       tags: string[];
     },
     authorId: string

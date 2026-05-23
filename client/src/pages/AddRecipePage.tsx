@@ -190,16 +190,6 @@ export default function AddRecipePage() {
       newErrors.title = 'Le titre est requis';
     }
 
-    const nonEmptyIngredients = form.ingredients.filter((ing) => ing.trim());
-    if (nonEmptyIngredients.length === 0) {
-      newErrors.ingredients = 'Au moins un ingrédient est requis';
-    }
-
-    const nonEmptySteps = form.steps.filter((step) => step.trim());
-    if (nonEmptySteps.length === 0) {
-      newErrors.steps = 'Au moins une étape est requise';
-    }
-
     setForm((prev) => ({
       ...prev,
       errors: newErrors,

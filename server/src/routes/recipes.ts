@@ -29,8 +29,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response, next: N
     const { title, image, ingredients, steps, tags } = req.body;
 
     // Validate required fields
-    if (!title || !ingredients || !steps) {
-      throw new AppError('MISSING_FIELDS', 400, 'Title, ingredients, and steps are required');
+    if (!title) {
+      throw new AppError('MISSING_FIELDS', 400, 'Title is required');
     }
 
     const recipe = await RecipeService.createRecipe(

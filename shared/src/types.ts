@@ -28,8 +28,8 @@ export interface IRecipe {
   _id?: ObjectId;
   title: string;
   image?: string;
-  ingredients: string[];
-  steps: string[];
+  ingredients?: string[];
+  steps?: string[];
   author: ObjectId;
   tags: string[];
   ratings: IRecipeRating[];
@@ -42,8 +42,8 @@ export interface IRecipeResponse {
   _id: string;
   title: string;
   image?: string;
-  ingredients: string[];
-  steps: string[];
+  ingredients?: string[];
+  steps?: string[];
   author: IUserResponse;
   tags: string[];
   ratings: {
