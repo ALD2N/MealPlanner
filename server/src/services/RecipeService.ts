@@ -57,10 +57,6 @@ export class RecipeService {
       throw new AppError('NOT_FOUND', 404, 'Recipe not found');
     }
 
-    if (recipe.author.toString() !== userId) {
-      throw new AppError('FORBIDDEN', 403, 'You are not the author of this recipe');
-    }
-
     if (data.title !== undefined) recipe.title = data.title;
     if (data.image !== undefined) recipe.image = data.image;
     if (data.ingredients !== undefined) recipe.ingredients = data.ingredients;
@@ -75,10 +71,6 @@ export class RecipeService {
     const recipe = await Recipe.findById(id);
     if (!recipe) {
       throw new AppError('NOT_FOUND', 404, 'Recipe not found');
-    }
-
-    if (recipe.author.toString() !== userId) {
-      throw new AppError('FORBIDDEN', 403, 'You are not the author of this recipe');
     }
 
     await Recipe.findByIdAndDelete(id);

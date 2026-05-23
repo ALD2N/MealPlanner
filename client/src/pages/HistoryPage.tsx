@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMealSelection } from '../hooks/useMealSelection';
+import { useRecipes } from '../hooks/useRecipes';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../contexts/ToastContext';
@@ -13,6 +14,7 @@ import api from '../services/api';
 export default function HistoryPage() {
   const navigate = useNavigate();
   const { currentMeal, history, selectMeal, getHistory, updateMealSelectedBy } = useMealSelection();
+  const { deleteRecipe, addRating } = useRecipes();
   const { on, off } = useWebSocket();
   const { user } = useAuth();
   const { addToast } = useToast();
@@ -248,7 +250,8 @@ export default function HistoryPage() {
           isOpen={true}
           onClose={() => setSelectedRecipe(null)}
           onSelectMeal={handleSelectMeal}
-          onAddRating={async () => { setSelectedRecipe(null); }}
+          onAddRating={(rating) => addRating(selectedRecipe._id, rating)}
+          onDeleteRecipe={(id) => deleteRecipe(id)}
           currentUserId={user?._id}
           hasPendingMeal={!!currentMeal}
         />

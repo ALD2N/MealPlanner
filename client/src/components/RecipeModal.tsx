@@ -11,6 +11,7 @@ interface RecipeModalProps {
   onClose: () => void;
   onSelectMeal: (recipeId: string) => Promise<void>;
   onAddRating: (rating: 1 | 2 | 3 | 4 | 5) => Promise<void>;
+  onDeleteRecipe?: (recipeId: string) => Promise<void>;
   currentUserId?: string;
   hasPendingMeal?: boolean;
 }
@@ -29,6 +30,7 @@ export default function RecipeModal({
   onClose,
   onSelectMeal,
   onAddRating,
+  onDeleteRecipe,
   currentUserId,
   hasPendingMeal = false,
 }: RecipeModalProps) {
@@ -36,6 +38,8 @@ export default function RecipeModal({
   const { addToast } = useToast();
   const [isSelectingMeal, setIsSelectingMeal] = useState(false);
   const [isRating, setIsRating] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   if (!isOpen) {
     return null;
@@ -58,6 +62,26 @@ export default function RecipeModal({
   const handleEditRecipe = () => {
     navigate(`/add-recipe?id=${recipe._id}`);
     onClose();
+  };
+
+  const handleDeleteRecipe = async () => {
+    setIsDeleting(true);
+    try {
+      if (onDeleteRecipe) {
+        await onDeleteRecipe(recipe._id);
+        addToast('Recette supprimée!', 'success');
+        onClose();
+      }
+    } catch (err: any) {
+      const message =
+        err.response?.data?.error ||
+        err.message ||
+        'Une erreur est survenue';
+      addToast(message, 'error');
+    } finally {
+      setIsDeleting(false);
+      setConfirmDelete(false);
+    }
   };
 
   const handleAddRating = async (rating: 1 | 2 | 3 | 4 | 5) => {
@@ -229,10 +253,18 @@ export default function RecipeModal({
             )}
 
             <button
+              onClick={() => setConfirmDelete(true)}
+              disabled={isDisabled || isDeleting}
+              className="flex-1 px-6 py-2 rounded-lg font-medium transition bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              🗑️ Supprimer
+            </button>
+
+            <button
               onClick={onClose}
-              disabled={isDisabled}
+              disabled={isDisabled || isDeleting}
               className={`flex-1 px-6 py-2 rounded-lg font-medium transition ${
-                isDisabled
+                isDisabled || isDeleting
                   ? 'bg-theme-hover text-theme-text opacity-50 cursor-not-allowed'
                   : 'bg-theme-hover text-theme-text hover:bg-theme-surface'
               }`}
@@ -242,6 +274,36 @@ export default function RecipeModal({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-theme-elevated rounded-lg p-8 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-display font-semibold text-theme-text mb-4">
+              Supprimer cette recette?
+            </h3>
+            <p className="text-theme-muted mb-6">
+              Cette action est irréversible. La recette sera définitivement supprimée.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 rounded-full font-medium border border-theme-text text-theme-text hover:bg-theme-hover transition disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDeleteRecipe}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 rounded-full font-medium bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-50"
+              >
+                {isDeleting ? 'Suppression...' : 'Supprimer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

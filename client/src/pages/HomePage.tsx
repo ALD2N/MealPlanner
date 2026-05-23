@@ -28,7 +28,7 @@ const SORT_OPTIONS: Array<{ id: string; label: string; field: string | null; dir
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { recipes, addRating } = useRecipes();
+  const { recipes, addRating, deleteRecipe } = useRecipes();
   const { currentMeal, selectMeal, deselectMeal, confirmMeal, getCurrentMeal } = useMealSelection();
   const { on, off } = useWebSocket();
   const { user } = useAuth();
@@ -292,6 +292,7 @@ export default function HomePage() {
           onClose={() => setSelectedRecipe(null)}
           onSelectMeal={handleSelectMeal}
           onAddRating={(rating) => addRating(selectedRecipe._id, rating)}
+          onDeleteRecipe={(id) => deleteRecipe(id)}
           currentUserId={user?._id}
           hasPendingMeal={!!currentMeal}
         />
