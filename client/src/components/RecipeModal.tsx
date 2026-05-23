@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IRecipeResponse } from '@dndmeal/shared';
 import { useToast } from '../contexts/ToastContext';
 
@@ -31,6 +32,7 @@ export default function RecipeModal({
   currentUserId,
   hasPendingMeal = false,
 }: RecipeModalProps) {
+  const navigate = useNavigate();
   const { addToast } = useToast();
   const [isSelectingMeal, setIsSelectingMeal] = useState(false);
   const [isRating, setIsRating] = useState(false);
@@ -51,6 +53,11 @@ export default function RecipeModal({
     } finally {
       setIsSelectingMeal(false);
     }
+  };
+
+  const handleEditRecipe = () => {
+    navigate(`/add-recipe?id=${recipe._id}`);
+    onClose();
   };
 
   const handleAddRating = async (rating: 1 | 2 | 3 | 4 | 5) => {
@@ -209,6 +216,7 @@ export default function RecipeModal({
 
             {isAuthor && (
               <button
+                onClick={handleEditRecipe}
                 disabled={isDisabled}
                 className={`flex-1 px-6 py-2 rounded-lg font-medium transition ${
                   isDisabled
