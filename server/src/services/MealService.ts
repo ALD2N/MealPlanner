@@ -112,6 +112,10 @@ export class MealService {
     const recipe = meal.recipe as any;
     const selectedBy = meal.selectedBy as any;
 
+    if (!recipe || !selectedBy) {
+      throw new AppError('INVALID_MEAL', 500, 'Meal has invalid recipe or user reference');
+    }
+
     const recipeResponse: IRecipeResponse = {
       _id: recipe._id.toString(),
       title: recipe.title,
