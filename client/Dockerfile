@@ -23,5 +23,6 @@ RUN cd client && VITE_API_URL=$VITE_API_URL VITE_WS_URL=$VITE_WS_URL npx tsc --s
 # Production stage
 FROM nginx:alpine AS prod
 COPY --from=build /app/client/dist /usr/share/nginx/html
+COPY client/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
