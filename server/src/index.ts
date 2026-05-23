@@ -14,22 +14,12 @@ import adminRoutes from './routes/admin.js';
 const app = express();
 const server = http.createServer(app);
 
-const allowedOrigins = [
-  config.CORS_ORIGIN,
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:5173',
-];
-
 const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, true);
-    }
-  },
+  origin: true,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: true,
 };
 
 export const io = new SocketIOServer(server, {
