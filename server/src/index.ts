@@ -19,7 +19,7 @@ const corsOptions = {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  preflightContinue: true,
+  optionsSuccessStatus: 200,
 };
 
 export const io = new SocketIOServer(server, {
@@ -27,6 +27,7 @@ export const io = new SocketIOServer(server, {
 });
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '20mb' }));
 
 app.get('/health', (req, res) => {
