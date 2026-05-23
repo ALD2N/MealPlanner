@@ -16,7 +16,9 @@ COPY shared ./shared
 COPY client ./client
 RUN npm ci --verbose
 RUN cd shared && npm run build && cd ..
-RUN cd client && npx tsc --skipLibCheck --noEmit && npx vite build && cd ..
+ARG VITE_API_URL=http://localhost:5000
+ARG VITE_WS_URL=ws://localhost:5000
+RUN cd client && VITE_API_URL=$VITE_API_URL VITE_WS_URL=$VITE_WS_URL npx tsc --skipLibCheck --noEmit && npx vite build && cd ..
 
 # Production stage
 FROM nginx:alpine AS prod
