@@ -8,6 +8,11 @@ services:
       MONGO_INITDB_DATABASE: mealplanner
     volumes:
       - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
     networks:
       - mealplanner
@@ -26,7 +31,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     restart: always
     networks:
       - mealplanner
