@@ -1,5 +1,5 @@
 # Dev stage
-FROM node:18-alpine AS dev
+FROM node:20-alpine AS dev
 WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* tsconfig.json ./
 COPY shared ./shared
@@ -9,14 +9,14 @@ EXPOSE 5173
 CMD ["/bin/sh", "-c", "cd client && npm run dev"]
 
 # Build stage
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 ARG VITE_API_URL=http://localhost:5000
 ARG VITE_WS_URL=ws://localhost:5000
 WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* tsconfig.json ./
 COPY shared ./shared
 COPY client ./client
-RUN cd client && npm install && VITE_API_URL=$VITE_API_URL VITE_WS_URL=$VITE_WS_URL npm run build && cd ..
+RUN npm ci && VITE_API_URL=$VITE_API_URL VITE_WS_URL=$VITE_WS_URL npm --prefix client run build
 
 # Production stage
 FROM nginx:alpine AS prod
