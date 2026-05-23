@@ -10,10 +10,6 @@ CMD ["/bin/sh", "-c", "cd client && npm run dev"]
 
 # Build stage
 FROM node:20-alpine AS build
-ARG VITE_API_URL=http://localhost:5000
-ARG VITE_WS_URL=ws://localhost:5000
-ENV VITE_API_URL=${VITE_API_URL}
-ENV VITE_WS_URL=${VITE_WS_URL}
 WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* tsconfig.json ./
 COPY shared ./shared
