@@ -56,12 +56,12 @@ export default function RecipeCard({ recipe, isNextMeal, onClick }: RecipeCardPr
         <h3 className="font-display font-semibold text-lg text-theme-text mb-1 line-clamp-2">{recipe.title}</h3>
         <p className="text-sm text-theme-muted mb-3">par {recipe.author.name}</p>
 
-        {recipe.ingredients.length > 0 && (
+        {recipe.ingredients && recipe.ingredients.length > 0 && (
           <div className="flex gap-2 flex-wrap mb-3 text-xs">
             <span className="bg-theme-hover text-theme-subtle px-2 py-1 rounded-full">
               {recipe.ingredients.length} ingrédients
             </span>
-            {recipe.steps.length > 0 && (
+            {recipe.steps && recipe.steps.length > 0 && (
               <span className="bg-theme-hover text-theme-subtle px-2 py-1 rounded-full">
                 {recipe.steps.length} étapes
               </span>

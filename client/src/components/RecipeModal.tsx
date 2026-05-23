@@ -128,7 +128,7 @@ export default function RecipeModal({
           <p className="text-theme-muted mb-6">par {recipe.author.name}</p>
 
           {/* Ingredients Section */}
-          {recipe.ingredients.length > 0 && (
+          {recipe.ingredients && recipe.ingredients.length > 0 && (
             <div className="mb-8">
               <h2 className="text-xl font-display font-semibold text-theme-text mb-4">Ingrédients</h2>
               <div className="grid grid-cols-2 gap-4">
@@ -142,7 +142,7 @@ export default function RecipeModal({
           )}
 
           {/* Steps Section */}
-          {recipe.steps.length > 0 && (
+          {recipe.steps && recipe.steps.length > 0 && (
             <div className="mb-8">
               <h2 className="text-xl font-display font-semibold text-theme-text mb-4">Étapes</h2>
               <ol className="space-y-3">
