@@ -43,6 +43,9 @@ services:
       dockerfile: client/Dockerfile
       target: prod
     container_name: mealplanner-client-prod
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.mealplanner-client.loadbalancer.server.port=80"
     ports:
       - "8081:80"
     depends_on:
