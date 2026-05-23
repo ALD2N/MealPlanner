@@ -170,7 +170,7 @@ export default function HomePage() {
             {user?.isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
-                className="px-4 py-2 rounded-lg font-medium bg-theme-hover text-theme-text hover:bg-theme-surface transition"
+                className="border border-theme-accent text-theme-accent px-4 py-2 rounded-full font-medium hover:bg-theme-accent-pale transition"
                 title="Accéder au panneau d'administration"
               >
                 ⚙️ Admin

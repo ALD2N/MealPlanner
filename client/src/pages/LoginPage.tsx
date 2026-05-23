@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../contexts/ToastContext';
@@ -21,6 +21,12 @@ export default function LoginPage() {
   }
 
   const inviteToken = searchParams.get('token');
+
+  useEffect(() => {
+    if (inviteToken) {
+      setTab('register');
+    }
+  }, [inviteToken]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

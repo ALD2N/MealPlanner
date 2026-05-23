@@ -76,7 +76,7 @@ export default function AdminPage() {
             </button>
             <button
               onClick={() => navigate('/')}
-              className="px-4 py-2 rounded-lg font-medium bg-theme-hover text-theme-text hover:bg-theme-surface transition"
+              className="px-4 py-2 rounded-full font-medium border border-theme-accent text-theme-accent hover:bg-theme-accent-pale transition"
             >
               ← Retour à l'accueil
             </button>
@@ -111,7 +111,7 @@ export default function AdminPage() {
             <button
               onClick={handleGenerateLink}
               disabled={isGenerating}
-              className={`px-6 py-2 rounded-lg font-medium transition ${
+              className={`px-6 py-2 rounded-full font-medium transition ${
                 isGenerating
                   ? 'bg-theme-accent text-theme-accent-text opacity-50 cursor-not-allowed'
                   : 'bg-theme-accent text-theme-accent-text hover:bg-theme-accent-hover'
@@ -165,14 +165,14 @@ export default function AdminPage() {
                       <button
                         onClick={() => handleCopyUrl(link.url)}
                         title="Copier l'URL"
-                        className="px-3 py-2 rounded bg-theme-hover text-theme-text hover:bg-theme-surface transition text-sm"
+                        className="px-3 py-2 rounded-full font-medium border border-theme-accent text-theme-accent hover:bg-theme-accent-pale transition text-sm"
                       >
                         📋 Copier
                       </button>
                       <button
                         onClick={() => setConfirmRevoke(link.token)}
                         title="Révoquer ce lien"
-                        className="px-3 py-2 rounded bg-red-100 text-red-700 hover:bg-red-200 transition text-sm"
+                        className="px-3 py-2 rounded-full font-medium bg-red-600 text-white hover:bg-red-700 transition text-sm"
                       >
                         🗑️ Révoquer
                       </button>
@@ -198,13 +198,13 @@ export default function AdminPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmRevoke(null)}
-                className="flex-1 px-4 py-2 rounded-lg font-medium bg-theme-hover text-theme-text hover:bg-theme-surface transition"
+                className="flex-1 px-4 py-2 rounded-full font-medium border border-theme-accent text-theme-accent hover:bg-theme-accent-pale transition"
               >
                 Annuler
               </button>
               <button
                 onClick={() => handleRevokeLink(confirmRevoke)}
-                className="flex-1 px-4 py-2 rounded-lg font-medium bg-red-600 text-white hover:bg-red-700 transition"
+                className="flex-1 px-4 py-2 rounded-full font-medium bg-red-600 text-white hover:bg-red-700 transition"
               >
                 Révoquer
               </button>
