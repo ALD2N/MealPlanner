@@ -1,15 +1,15 @@
 import { Router, Response, NextFunction } from 'express';
-import { MealService } from '../services/MealService';
-import { DiscordService } from '../services/DiscordService';
-import { AppError } from '../middleware/errorHandler';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { io } from '../index';
+import { MealService } from '../services/MealService.js';
+import { DiscordService } from '../services/DiscordService.js';
+import { AppError } from '../middleware/errorHandler.js';
+import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { io } from '../index.js';
 import {
   broadcastMealSelected,
   broadcastMealConfirmed,
   broadcastMealDeselected,
   broadcastMealUpdated,
-} from '../websocket/handlers';
+} from '../websocket/handlers.js';
 
 const router = Router();
 

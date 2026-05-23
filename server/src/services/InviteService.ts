@@ -1,8 +1,8 @@
-import { InviteLink, IInviteLinkDocument } from '../models/InviteLink';
-import { AppError } from '../middleware/errorHandler';
+import { InviteLink, IInviteLinkDocument } from '../models/InviteLink.js';
+import { AppError } from '../middleware/errorHandler.js';
 import { IInviteLinkResponse } from '@dndmeal/shared';
-import { config } from '../config';
-import { User } from '../models/User';
+import { config } from '../config.js';
+import { User } from '../models/User.js';
 
 export class InviteService {
   static async generateInviteLink(

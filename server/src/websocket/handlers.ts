@@ -1,5 +1,5 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { AuthService } from '../services/AuthService';
+import { AuthService } from '../services/AuthService.js';
 import { IWebSocketPayloads } from '@dndmeal/shared';
 
 export function setupWebSocketHandlers(io: SocketIOServer) {

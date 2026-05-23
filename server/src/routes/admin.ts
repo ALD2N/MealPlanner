@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { InviteService } from '../services/InviteService';
-import { AppError } from '../middleware/errorHandler';
-import { authMiddleware, adminMiddleware, AuthRequest } from '../middleware/auth';
+import { InviteService } from '../services/InviteService.js';
+import { AppError } from '../middleware/errorHandler.js';
+import { authMiddleware, adminMiddleware, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 

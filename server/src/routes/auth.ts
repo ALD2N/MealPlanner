@@ -1,9 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { AuthService } from '../services/AuthService';
-import { InviteService } from '../services/InviteService';
-import { AppError } from '../middleware/errorHandler';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { User } from '../models/User';
+import { AuthService } from '../services/AuthService.js';
+import { InviteService } from '../services/InviteService.js';
+import { AppError } from '../middleware/errorHandler.js';
+import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { User } from '../models/User.js';
 
 const router = Router();
 

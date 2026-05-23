@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthService } from '../services/AuthService';
-import { User } from '../models/User';
-import { AppError } from './errorHandler';
+import { AuthService } from '../services/AuthService.js';
+import { User } from '../models/User.js';
+import { AppError } from './errorHandler.js';
 
 export interface AuthRequest extends Request {
   userId?: string;

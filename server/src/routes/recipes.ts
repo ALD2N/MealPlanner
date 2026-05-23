@@ -1,9 +1,9 @@
 import { Router, Response, NextFunction } from 'express';
-import { RecipeService } from '../services/RecipeService';
-import { AppError } from '../middleware/errorHandler';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { io } from '../index';
-import { broadcastRecipeAdded, broadcastRecipeUpdated, broadcastRecipeDeleted, broadcastRatingAdded } from '../websocket/handlers';
+import { RecipeService } from '../services/RecipeService.js';
+import { AppError } from '../middleware/errorHandler.js';
+import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { io } from '../index.js';
+import { broadcastRecipeAdded, broadcastRecipeUpdated, broadcastRecipeDeleted, broadcastRatingAdded } from '../websocket/handlers.js';
 
 const router = Router();
 

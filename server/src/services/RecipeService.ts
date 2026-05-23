@@ -1,5 +1,5 @@
-import { Recipe } from '../models/Recipe';
-import { AppError } from '../middleware/errorHandler';
+import { Recipe } from '../models/Recipe.js';
+import { AppError } from '../middleware/errorHandler.js';
 import { IRecipeResponse, IUserResponse } from '@dndmeal/shared';
 import { Types } from 'mongoose';
 

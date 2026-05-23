@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { config } from '../config';
-import { User } from '../models/User';
+import { config } from '../config.js';
+import { User } from '../models/User.js';
 import { IUserResponse } from '@dndmeal/shared';
 
 export class AuthService {

@@ -1,6 +1,6 @@
-import { MealSelection } from '../models/MealSelection';
-import { Recipe } from '../models/Recipe';
-import { AppError } from '../middleware/errorHandler';
+import { MealSelection } from '../models/MealSelection.js';
+import { Recipe } from '../models/Recipe.js';
+import { AppError } from '../middleware/errorHandler.js';
 import { IMealSelectionResponse, IRecipeResponse, IUserResponse } from '@dndmeal/shared';
 import { Types } from 'mongoose';
 
