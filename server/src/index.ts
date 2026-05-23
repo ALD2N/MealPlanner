@@ -13,14 +13,30 @@ import adminRoutes from './routes/admin.js';
 
 const app = express();
 const server = http.createServer(app);
-export const io = new SocketIOServer(server, {
-  cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    credentials: true,
+
+const allowedOrigins = [
+  config.CORS_ORIGIN,
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:5173',
+];
+
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
   },
+  credentials: true,
+};
+
+export const io = new SocketIOServer(server, {
+  cors: corsOptions,
 });
 
-app.use(cors({ origin: config.CORS_ORIGIN, credentials: true }));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '20mb' }));
 
 app.get('/health', (req, res) => {
