@@ -15,6 +15,7 @@ COPY package.json yarn.lock* package-lock.json* tsconfig.json ./
 COPY shared ./shared
 COPY client ./client
 RUN npm ci --verbose
+RUN cd shared && npm run build && cd ..
 RUN cd client && npx tsc --skipLibCheck --noEmit && npx vite build && cd ..
 
 # Production stage
